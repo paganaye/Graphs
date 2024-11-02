@@ -80,6 +80,7 @@ namespace Graphs
             GraphView.Content = new GraphView(_graph);
             Graph6TextBox.Text = Graph6.Serialize(_graph);
             NodeCountControl.Value = _graph.NodeCount;
+            GraphSignatureTextBox.Text = new GraphSignature(_graph).ToString();
         }
     }
 }

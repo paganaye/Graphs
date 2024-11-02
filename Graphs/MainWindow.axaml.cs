@@ -1,61 +1,73 @@
 using System;
+using System.Threading.Tasks;
 
 namespace Graphs;
+
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
+public partial class MainWindow : Window
+{
+    private readonly Graph graph1;
+    private readonly Graph graph2;
 
-
-    public partial class MainWindow : Window
+    public MainWindow()
     {
-        private readonly Graph graph1;
-        private readonly Graph graph2;
+        InitializeComponent();
+        graph1 = new Graph(5);
+        graph2 = new Graph(5);
+        GraphControl1.SetGraph(graph1);
+        GraphControl2.SetGraph(graph2);
+        CompareButton.Click += OnCompareButtonClick;
+    }
 
-        public MainWindow()
+    private async void OnCompareButtonClick(object sender, RoutedEventArgs e)
+    {
+        CompareResult.Text = "...";
+        await Task.Delay(1); // Laisser le temps à l'interface de se mettre à jour
+
+        if (graph1.NodeCount != graph2.NodeCount)
         {
-            InitializeComponent();
-            graph1 = new Graph(5);
-            graph2 = new Graph(5);
-            GraphControl1.SetGraph(graph1);
-            GraphControl2.SetGraph(graph2);
-            CompareButton.Click += OnCompareButtonClick;
+            CompareResult.Text = "The graphs have different numbers of nodes and cannot be compared directly.";
+            return;
         }
 
-        private void OnCompareButtonClick(object sender, RoutedEventArgs e)
+        bool areIdentical = GraphComparer.Compare(graph1, graph2);
+
+        if (areIdentical)
         {
-            CompareResult.Text = "...";
-            if (graph1.NodeCount != graph2.NodeCount)
-            {
-                CompareResult.Text = "The graphs have different numbers of nodes and cannot be compared directly.";
-                return;
-            }
+            CompareResult.Text = "The graphs are identical!";
+        }
+        else
+        {
+            var g1s = graph1.Signature();
+            var g2s = graph2.Signature();
+            var sameSignature = g1s == g2s;
 
-            bool areIdentical = GraphComparer.Compare(graph1, graph2);
-            
-            if (areIdentical)
+            try
             {
-                CompareResult.Text = "The graphs are identical!";
-            }
-            else
-            {
-                try
+                if (SimpleIsomorphic.Compare(graph1, graph2))
                 {
-
-                    if (SimpleIsomorphic.Compare(graph1, graph2))
-                    {
-                        CompareResult.Text = "The graphs are isomorphic.";
-                    }
-                    else
-                    {
-                        CompareResult.Text = "The graphs are different!";
-                    }
+                    CompareResult.Text = "The graphs are isomorphic" +
+                                         (sameSignature
+                                             ? " and the signatures match."
+                                             : " but the signatures are not identical.");
                 }
-                catch (Exception ex)
+                else
                 {
-                    CompareResult.Text = ex.Message;
+                    CompareResult.Text = "The graphs are different " +
+                                         (sameSignature
+                                             ? " but the signatures match."
+                                             : " and the signatures are not identical.");
                 }
             }
-            
-            
+            catch (Exception ex)
+            {
+                CompareResult.Text = ex.Message +
+                                     (sameSignature
+                                         ? " - \u2705 The signatures match."
+                                         : " - \u274c The signatures are not identical.");
+            }
         }
     }
+}

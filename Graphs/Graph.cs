@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Graphs;
 
@@ -53,33 +55,38 @@ public class Graph
         return edgeIndex >= 0 && _edges[edgeIndex];
     }
 
-    public void DisplayMatrix()
-    {
-        Console.Write("  ");
-        for (int i = 0; i < _nodeCount; i++)
-        {
-            Console.Write(NodeName.Get(i) + " ");
-        }
-
-        Console.WriteLine();
-
-        for (int i = 0; i < _nodeCount; i++)
-        {
-            Console.Write(NodeName.Get(i) + " ");
-            for (int j = 0; j < _nodeCount; j++)
-            {
-                Console.Write((i == j ? "-" : (HasEdge(i, j) ? "1" : "0")) + " ");
-            }
-
-            Console.WriteLine();
-        }
-    }
-
-
     public Graph Clone()
     {
         Graph result = new Graph(this._nodeCount);
         Array.Copy(this._edges, result._edges, this._edges.Length);
         return result;
+    }
+}
+
+
+public static class GraphExtensions
+{
+    public static int GetNeighborCount(this Graph graph, int nodeIndex)
+    {
+        return graph.ForEachNeighbor(nodeIndex).Count();
+    }
+
+    public static IEnumerable<int> ForEachNode(this Graph graph)
+    {
+        for (int i = 0; i < graph.NodeCount; i++)
+        {
+            yield return i;
+        }
+    }
+
+    public static IEnumerable<int> ForEachNeighbor(this Graph graph, int nodeIndex)
+    {
+        for (int i = 0; i < graph.NodeCount; i++)
+        {
+            if (i != nodeIndex && graph.HasEdge(nodeIndex, i))
+            {
+                yield return i;
+            }
+        }
     }
 }

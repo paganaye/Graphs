@@ -14,6 +14,9 @@
                            Foreground="White" Background="Gray" Increment="1" />
             <TextBlock Text="Graph6 Format:" />
             <TextBox x:Name="Graph6TextBox" Width="200" Height="30" Margin="0,5" />
+            <TextBlock Text="Graph signature:" />
+            <TextBox x:Name="GraphSignatureTextBox" Width="200" Height="30" Margin="0,5"  IsReadOnly="True"/>
+
         </StackPanel>
         <graphs:GraphView x:Name="GraphView" />
     </DockPanel>
