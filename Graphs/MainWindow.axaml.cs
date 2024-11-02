@@ -1,55 +1,80 @@
+namespace Graphs;
+
 using Avalonia.Controls;
 using System;
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 
-namespace Graphs
+public partial class MainWindow : Window
 {
-    public partial class MainWindow : Window
+    private Graph _graph;
+
+    public MainWindow()
     {
-        private Graph _graph;
+        InitializeComponent();
+        _graph = new Graph(12);
+        // Subscribe buttons to their events
+        RandomGraphButton.Click += OnRandomGraphButtonClick!;
+        ShuffleButton.Click += OnShuffleButtonClick!;
+        NodeCountControl.ValueChanged += OnNodeCountChanged!;
+        CreateRandomGraph();
+    }
 
-        public MainWindow()
+
+    private void OnRandomGraphButtonClick(object sender, RoutedEventArgs e)
+    {
+        CreateRandomGraph();
+    }
+
+    private void OnShuffleButtonClick(object sender, RoutedEventArgs e)
+    {
+        ShuffleGraph();
+    }
+
+    private void CreateRandomGraph()
+    {
+        GraphRandomizer.FillRandomAdjacencies(_graph); // Fill the graph with random connections
+        NodeCountControl.Value = _graph.NodeCount;
+        UpdateGraph();
+    }
+
+    private void ShuffleGraph()
+    {
+        GraphShuffler.ShuffleGraph(_graph); // Shuffle existing connections
+        UpdateGraph();
+    }
+
+    private void OnNodeCountChanged(object sender, NumericUpDownValueChangedEventArgs e)
+    {
+        if (e.NewValue is { } newCount && newCount != _graph.NodeCount)
         {
-            InitializeComponent();
-            _graph = new Graph(12);
-            // Subscribe buttons to their events
-            RandomGraphButton.Click += OnRandomGraphButtonClick!;
-            ShuffleButton.Click += OnShuffleButtonClick!;
-            NodeCountControl.ValueChanged += OnNodeCountChanged!;
-            CreateRandomGraph();
+            _graph = GraphCloner.CopyResizeGraph(_graph, (int)newCount);
+            UpdateGraph();
         }
+    }
 
-        private void OnRandomGraphButtonClick(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void OnGraph6TextChanged(object sender, TextChangedEventArgs e)
+    {
+        try
         {
-            CreateRandomGraph();
-        }
-
-        private void OnShuffleButtonClick(object sender, Avalonia.Interactivity.RoutedEventArgs e)
-        {
-            ShuffleGraph();
-        }
-
-        private void CreateRandomGraph()
-        {
-            GraphRandomizer.FillRandomAdjacencies(_graph); // Fill the graph with random connections
-            NodeCountControl.Value = _graph.NodeCount;
-            GraphView1.Content = new GraphView(_graph);
-        }
-
-        private void ShuffleGraph()
-        {
-            GraphShuffler.ShuffleGraph(_graph); // Shuffle existing connections
-            GraphView1.Content = new GraphView(_graph); // Update the display
-        }
-
-        private void OnNodeCountChanged(object sender, NumericUpDownValueChangedEventArgs e)
-        {
-            if (e.NewValue is { } newCount && newCount!=_graph.NodeCount)
+            if (Graph6TextBox.Text != null)
             {
-                _graph = GraphCloner.CopyResizeGraph(_graph, (int)newCount);
-                GraphView1.Content = new GraphView(_graph); 
+                _graph = Graph6.Deserialize(Graph6TextBox.Text);
+                UpdateGraph();
             }
         }
+        catch (Exception)
+        {
+            // Gérer les erreurs de désérialisation si nécessaire
+        }
+    }
 
+
+    private void UpdateGraph()
+    {
+        GraphView1.Content = new GraphView(_graph);
+        Graph6TextBox.Text=  Graph6.Serialize(_graph);
+        NodeCountControl.Value = _graph.NodeCount;
     }
 }

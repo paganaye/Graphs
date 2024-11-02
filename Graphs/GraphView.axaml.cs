@@ -19,9 +19,6 @@ namespace Graphs
 
         public GraphView(Graph graph)
         {
-            if (graph.NodeCount < 2 || graph.NodeCount > 52)
-                throw new ArgumentException("Graph must have between 2 and 52 nodes.");
-
             InitializeComponent();
             _graph = graph;
             DrawGraph();
