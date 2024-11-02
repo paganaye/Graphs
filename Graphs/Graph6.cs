@@ -40,7 +40,7 @@ public static class Graph6
         return sb.ToString();
     }
 
-    public static Graph Deserialize(string graph6)
+    public static void Deserialize(Graph graph, string graph6)
     {
         if (graph6[0] != 'g')
         {
@@ -58,8 +58,7 @@ public static class Graph6
         }
 
         int nodeCount = int.Parse(nodeCountBuilder.ToString());
-        Graph graph = new Graph(nodeCount);
-
+        graph.SetNodeCount(nodeCount);
         // Read edges starting from where the edge characters begin
         char[] edgeChars = graph6.Substring(currentIndex).ToCharArray();
         int edgeIndex = 0;
@@ -98,6 +97,5 @@ public static class Graph6
             }
         }
 
-        return graph;
     }
 }

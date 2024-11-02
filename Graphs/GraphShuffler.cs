@@ -35,12 +35,6 @@ namespace Graphs
                     graph.SetEdge(i, j, previousEdges[previousPositions[i], previousPositions[j]]); // Set edge in the new graph
                 }
             }
-
-            
-            
-            
-            
-            
         }
     }
 }

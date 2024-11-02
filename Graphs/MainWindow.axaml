@@ -6,16 +6,16 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Graphs.MainWindow"
         Title="Graphs">
+
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" VerticalAlignment="Stretch" Orientation="Horizontal">
-            <Button x:Name="RandomGraphButton" Content="Random Graph" />
-            <Button x:Name="ShuffleButton" Content="Shuffle" />
-            <TextBlock Text="Nodes:" Margin="10,0,10,0" VerticalAlignment="Center" MinWidth="80" />
-            <NumericUpDown x:Name="NodeCountControl" Minimum="2" Maximum="52" Width="130" Margin="5,0,10,0"
-                           Foreground="White" Background="Gray" Increment="1" />
-            <TextBlock Text="Graph6:" VerticalAlignment="Center" Margin="10,0,10,0" />
-            <TextBox x:Name="Graph6TextBox" Width="400" Height="30" Margin="0,5" TextChanged="OnGraph6TextChanged" />
+        <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Stretch" Orientation="Horizontal">
+            <Button x:Name="CompareButton" Content="Compare" />
+            <TextBlock x:Name="CompareResult" Text="" Margin="10,0,10,0" VerticalAlignment="Center" Width="200" />
         </StackPanel>
-        <graphs:GraphView x:Name="GraphView1" />
+        <Grid ColumnDefinitions="*,*">
+            <graphs:GraphControl x:Name="GraphControl1" Grid.Column="0" />
+            <graphs:GraphControl x:Name="GraphControl2" Grid.Column="1" />
+        </Grid>
     </DockPanel>
+
 </Window>

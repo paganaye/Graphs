@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:graphs="clr-namespace:Graphs"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
+             x:Class="Graphs.GraphControl">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" VerticalAlignment="Stretch" Orientation="Horizontal">
+            <Button x:Name="RandomGraphButton" Content="Random Graph" />
+            <Button x:Name="ShuffleButton" Content="Shuffle" />
+            <TextBlock Text="Nodes:" Margin="10,0,10,0" VerticalAlignment="Center" MinWidth="80" />
+            <NumericUpDown x:Name="NodeCountControl" Minimum="2" Maximum="52" Width="130" Margin="5,0,10,0"
+                           Foreground="White" Background="Gray" Increment="1" />
+            <TextBlock Text="Graph6 Format:" />
+            <TextBox x:Name="Graph6TextBox" Width="200" Height="30" Margin="0,5" />
+        </StackPanel>
+        <graphs:GraphView x:Name="GraphView" />
+    </DockPanel>
+</UserControl>

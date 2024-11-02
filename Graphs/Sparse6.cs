@@ -28,7 +28,7 @@ public static class Sparse6
         return sb.ToString();
     }
 
-    public static Graph Deserialize(string sparse6)
+    public static void Deserialize(Graph graph, string sparse6)
     {
         if (sparse6[0] != 's')
         {
@@ -36,7 +36,7 @@ public static class Sparse6
         }
 
         int nodeCount = int.Parse(sparse6[1].ToString());
-        Graph graph = new Graph(nodeCount);
+         graph.SetNodeCount(nodeCount);
 
         // Start reading from the 2nd character (after "s" and node count)
         for (int i = 2; i < sparse6.Length; i += 2)
@@ -49,7 +49,5 @@ public static class Sparse6
 
             graph.SetEdge(node1Index, node2Index, true);
         }
-
-        return graph;
     }
 }

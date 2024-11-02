@@ -1,80 +1,42 @@
 namespace Graphs;
-
-using Avalonia.Controls;
-using System;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
-public partial class MainWindow : Window
-{
-    private Graph _graph;
 
-    public MainWindow()
+
+    public partial class MainWindow : Window
     {
-        InitializeComponent();
-        _graph = new Graph(12);
-        // Subscribe buttons to their events
-        RandomGraphButton.Click += OnRandomGraphButtonClick!;
-        ShuffleButton.Click += OnShuffleButtonClick!;
-        NodeCountControl.ValueChanged += OnNodeCountChanged!;
-        CreateRandomGraph();
-    }
+        private readonly Graph graph1;
+        private readonly Graph graph2;
 
-
-    private void OnRandomGraphButtonClick(object sender, RoutedEventArgs e)
-    {
-        CreateRandomGraph();
-    }
-
-    private void OnShuffleButtonClick(object sender, RoutedEventArgs e)
-    {
-        ShuffleGraph();
-    }
-
-    private void CreateRandomGraph()
-    {
-        GraphRandomizer.FillRandomAdjacencies(_graph); // Fill the graph with random connections
-        NodeCountControl.Value = _graph.NodeCount;
-        UpdateGraph();
-    }
-
-    private void ShuffleGraph()
-    {
-        GraphShuffler.ShuffleGraph(_graph); // Shuffle existing connections
-        UpdateGraph();
-    }
-
-    private void OnNodeCountChanged(object sender, NumericUpDownValueChangedEventArgs e)
-    {
-        if (e.NewValue is { } newCount && newCount != _graph.NodeCount)
+        public MainWindow()
         {
-            _graph = GraphCloner.CopyResizeGraph(_graph, (int)newCount);
-            UpdateGraph();
+            InitializeComponent();
+            graph1 = new Graph(12);
+            graph2 = new Graph(12);
+            GraphControl1.SetGraph(graph1);
+            GraphControl2.SetGraph(graph2);
+            CompareButton.Click += OnCompareButtonClick;
         }
-    }
 
-    private void OnGraph6TextChanged(object sender, TextChangedEventArgs e)
-    {
-        try
+        private void OnCompareButtonClick(object sender, RoutedEventArgs e)
         {
-            if (Graph6TextBox.Text != null)
+            if (graph1.NodeCount != graph2.NodeCount)
             {
-                _graph = Graph6.Deserialize(Graph6TextBox.Text);
-                UpdateGraph();
+                CompareResult.Text = "The graphs have different numbers of nodes and cannot be compared directly.";
+                return;
+            }
+
+
+            bool areIdentical = GraphComparer.Compare(graph1, graph2);
+            
+            if (areIdentical)
+            {
+                CompareResult.Text = "The graphs are identical!";
+            }
+            else
+            {
+                CompareResult.Text = "The graphs are different!";
             }
         }
-        catch (Exception)
-        {
-            // Gérer les erreurs de désérialisation si nécessaire
-        }
     }
-
-
-    private void UpdateGraph()
-    {
-        GraphView1.Content = new GraphView(_graph);
-        Graph6TextBox.Text=  Graph6.Serialize(_graph);
-        NodeCountControl.Value = _graph.NodeCount;
-    }
-}

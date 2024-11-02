@@ -4,11 +4,20 @@ namespace Graphs;
 
 public class Graph
 {
-    private readonly int _nodeCount;
-    private readonly int _edgeCount;
-    private readonly bool[] _edges;
+    private int _nodeCount;
+    private int _edgeCount;
+    private bool[] _edges;
 
     public Graph(int nodeCount)
+    {
+        SetNodeCount(nodeCount);
+    }
+
+    public int NodeCount => _nodeCount;
+    public int EdgeCount => _edgeCount;
+
+    // SetNodeCount: This method allows changing the number of nodes dynamically
+    public void SetNodeCount(int nodeCount)
     {
         if (nodeCount < 1 || nodeCount > 52)
         {
@@ -20,21 +29,17 @@ public class Graph
         _edges = new bool[_edgeCount];
     }
 
-    public int NodeCount => _nodeCount;
-    public int EdgeCount => _edgeCount;
-
     public void SetEdge(char node1, char node2, bool value)
     {
         int edgeIndex = EdgeName.GetEdgeIndex(node1, node2);
-        this._edges[edgeIndex] = value;
+        _edges[edgeIndex] = value;
     }
 
     public void SetEdge(int node1, int node2, bool value)
     {
         int edgeIndex = EdgeName.GetEdgeIndex(node1, node2);
-        this._edges[edgeIndex] = value;
+        _edges[edgeIndex] = value;
     }
-
 
     public bool HasEdge(char node1, char node2)
     {
@@ -63,10 +68,12 @@ public class Graph
             Console.Write(NodeName.Get(i) + " ");
             for (int j = 0; j < _nodeCount; j++)
             {
-                Console.Write((HasEdge(i, j) ? "1" : "0") + " ");
+                Console.Write((i == j ? "-" : (HasEdge(i, j) ? "1" : "0")) + " ");
             }
 
             Console.WriteLine();
         }
     }
+
+
 }
