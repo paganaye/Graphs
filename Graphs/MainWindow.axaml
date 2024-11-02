@@ -10,7 +10,7 @@
     <DockPanel>
         <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Stretch" Orientation="Horizontal">
             <Button x:Name="CompareButton" Content="Compare" />
-            <TextBlock x:Name="CompareResult" Text="" Margin="10,0,10,0" VerticalAlignment="Center" Width="200" />
+            <TextBlock x:Name="CompareResult" Text="" Margin="10,0,10,0" VerticalAlignment="Center" Width="400" />
         </StackPanel>
         <Grid ColumnDefinitions="*,*">
             <graphs:GraphControl x:Name="GraphControl1" Grid.Column="0" />

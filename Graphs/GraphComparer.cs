@@ -1,3 +1,5 @@
+using System;
+
 namespace Graphs;
 
 internal static class GraphComparer

@@ -13,8 +13,6 @@ namespace Graphs
         public GraphView()
         {
             InitializeComponent();
-            _graph = new Graph(2); // Crée un graphe par défaut avec 2 nœuds pour éviter l'erreur
-            DrawGraph();
         }
 
         public GraphView(Graph graph)
@@ -26,6 +24,7 @@ namespace Graphs
 
         private void DrawGraph()
         {
+            if (_graph==null) return;
             // Calcul de position des nœuds sur un cercle
             int nodeCount = _graph.NodeCount;
             double centerX = 80 + nodeCount * 12;

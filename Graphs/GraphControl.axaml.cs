@@ -13,7 +13,6 @@ namespace Graphs
             InitializeComponent();
 
             // Initialiser le graphe par défaut
-            _graph = new Graph(12);
 
             // Souscrire les événements des boutons
             RandomGraphButton.Click += OnRandomGraphButtonClick;
@@ -44,7 +43,7 @@ namespace Graphs
         {
             if (e.NewValue is { } newCount && newCount != _graph.NodeCount)
             {
-                _graph = GraphCloner.CopyResizeGraph(_graph, (int)newCount);
+                GraphResizer.SetNodeCount(_graph, (int)newCount);
                 UpdateGraph();
             }
         }
@@ -77,6 +76,7 @@ namespace Graphs
 
         private void UpdateGraph()
         {
+            if (_graph == null) return;
             GraphView.Content = new GraphView(_graph);
             Graph6TextBox.Text = Graph6.Serialize(_graph);
             NodeCountControl.Value = _graph.NodeCount;

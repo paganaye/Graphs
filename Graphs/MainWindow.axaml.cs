@@ -1,3 +1,5 @@
+using System;
+
 namespace Graphs;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -12,8 +14,8 @@ using Avalonia.Interactivity;
         public MainWindow()
         {
             InitializeComponent();
-            graph1 = new Graph(12);
-            graph2 = new Graph(12);
+            graph1 = new Graph(5);
+            graph2 = new Graph(5);
             GraphControl1.SetGraph(graph1);
             GraphControl2.SetGraph(graph2);
             CompareButton.Click += OnCompareButtonClick;
@@ -21,12 +23,12 @@ using Avalonia.Interactivity;
 
         private void OnCompareButtonClick(object sender, RoutedEventArgs e)
         {
+            CompareResult.Text = "...";
             if (graph1.NodeCount != graph2.NodeCount)
             {
                 CompareResult.Text = "The graphs have different numbers of nodes and cannot be compared directly.";
                 return;
             }
-
 
             bool areIdentical = GraphComparer.Compare(graph1, graph2);
             
@@ -36,7 +38,24 @@ using Avalonia.Interactivity;
             }
             else
             {
-                CompareResult.Text = "The graphs are different!";
+                try
+                {
+
+                    if (SimpleIsomorphic.Compare(graph1, graph2))
+                    {
+                        CompareResult.Text = "The graphs are isomorphic.";
+                    }
+                    else
+                    {
+                        CompareResult.Text = "The graphs are different!";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CompareResult.Text = ex.Message;
+                }
             }
+            
+            
         }
     }

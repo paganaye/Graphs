@@ -76,4 +76,10 @@ public class Graph
     }
 
 
+    public Graph Clone()
+    {
+        Graph result = new Graph(this._nodeCount);
+        Array.Copy(this._edges, result._edges, this._edges.Length);
+        return result;
+    }
 }
