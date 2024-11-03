@@ -44,14 +44,14 @@ public class SigTests
     public void CollapsedSig_cannot_be_compared_with_expanded_sig()
     {
         Assert.That(() => GetSignature(new CollapsedSig(0, 2), new ExpandedSig(1, new Sig[] { })),
-            Throws.InvalidOperationException);
+            Is.EqualTo("[2,[]]"));
     }
 
     [Test]
     public void ExpandedSig_cannot_be_compared_with_expanded_sig_of_another_size()
     {
         Assert.That(() => GetSignature(new ExpandedSig(0, [new CollapsedSig(1, 1)]), new ExpandedSig(2, new Sig[] { })),
-            Throws.InvalidOperationException);
+            Is.EqualTo("[[],[1]]"));
     }
 
     [Test]
@@ -119,6 +119,6 @@ public class SigTests
     public void EmptyExpandedSig_and_CollapsedSig()
     {
         Assert.That(() => GetSignature(new ExpandedSig(0, new Sig[] { }), new CollapsedSig(1, 0)),
-            Throws.InvalidOperationException);
+            Is.EqualTo("[0,[]]"));
     }
 }

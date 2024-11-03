@@ -24,9 +24,11 @@ namespace Graphs
 
         private void DrawGraph()
         {
-            if (_graph==null) return;
-            // Calcul de position des nœuds sur un cercle
+            GraphCanvas1.Children.Clear();
+
+            if (_graph == null) return;
             int nodeCount = _graph.NodeCount;
+            if (nodeCount > 50) return;
             double centerX = 80 + nodeCount * 12;
             double centerY = centerX;
             double radius = Math.Min(centerX, centerY) - 50;
@@ -38,7 +40,6 @@ namespace Graphs
                 nodePositions[i] = (centerX + radius * Math.Cos(angle), centerY + radius * Math.Sin(angle));
             }
 
-            // Dessiner les arêtes
             for (int j = 0; j < nodeCount; j++)
             {
                 for (int i = 0; i < j; i++)
@@ -54,7 +55,6 @@ namespace Graphs
                 }
             }
 
-            // Dessiner les nœuds
             for (int i = 0; i < nodeCount; i++)
             {
                 var circle = new Ellipse

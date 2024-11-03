@@ -12,17 +12,22 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,5">
                 <StackPanel Orientation="Horizontal" Grid.Column="0" Margin="5,0">
                     <TextBlock Text="Nodes:" VerticalAlignment="Center" Margin="0,0,5,0" />
-                    <NumericUpDown x:Name="NodeCountControl" Minimum="2" Maximum="52" Width="150" Margin="0,0,10,0"
+                    <NumericUpDown x:Name="NodeCountControl" Minimum="2" Maximum="1000" Width="150" Margin="0,0,10,0"
                                    Foreground="White" Background="Gray" Increment="1" />
                 </StackPanel>
                 <Button x:Name="RandomGraphButton" Content="Random Graph" Margin="5,0" />
+                <StackPanel Orientation="Horizontal" Grid.Column="0" Margin="5,0">
+                    <TextBlock Text="Fill:" VerticalAlignment="Center" Margin="0,0,5,0" />
+                    <NumericUpDown x:Name="FillControl" Minimum="0" Maximum="100" Width="120" Margin="0,0,10,0"
+                                   Foreground="White" Background="Gray" Increment="1" Value="50" />
+                </StackPanel>
                 <Button x:Name="ShuffleButton" Content="Shuffle" Margin="5,0" />
             </StackPanel>
 
-            <!-- Line 2 : Graph6 Format -->
+            <!-- Line 2 : Edge list -->
             <Grid ColumnDefinitions="150,*" Margin="5,0,0,5">
-                <TextBlock Text="Graph6 Format:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,5,0" />
-                <TextBox x:Name="Graph6TextBox" Grid.Column="1" Height="25" />
+                <TextBlock Text="Edge List:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,5,0" />
+                <TextBox x:Name="EdgeListTextBox" Grid.Column="1" Height="25" />
             </Grid>
 
             <!-- Line 3 : Graph signature -->

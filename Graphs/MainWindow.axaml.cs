@@ -8,20 +8,26 @@ using Avalonia.Interactivity;
 
 public partial class MainWindow : Window
 {
-    private readonly Graph graph1;
-    private readonly Graph graph2;
+    private Graph graph1;
+    private Graph graph2;
 
     public MainWindow()
     {
         InitializeComponent();
-        graph1 = new Graph(5);
-        graph2 = new Graph(5);
+        graph1 = EdgeList.Deserialize(9, "(1,2),(3,5),(6,8),(7,8),(4,9),(7,9)");
+        graph2 = graph1.shuffled();
         GraphControl1.SetGraph(graph1);
         GraphControl2.SetGraph(graph2);
         CompareButton.Click += OnCompareButtonClick;
+        CompareSignatures();
     }
 
-    private async void OnCompareButtonClick(object sender, RoutedEventArgs e)
+    void OnCompareButtonClick(object sender, RoutedEventArgs e)
+    {
+        CompareSignatures();
+    }
+
+    private async void CompareSignatures()
     {
         CompareResult.Text = "...";
         await Task.Delay(1); // Allow the UI to update
@@ -42,31 +48,41 @@ public partial class MainWindow : Window
         }
 
         // Step 3: Calculate and display the signature for each graph, with timing
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        var g1s = graph1.Signature();
-        stopwatch.Stop();
-        var g2s = graph2.Signature();
+        var stopwatch1 = System.Diagnostics.Stopwatch.StartNew();
+        var g1s = graph1.CalculateSignature();
+        stopwatch1.Stop();
+        var stopwatch2 = System.Diagnostics.Stopwatch.StartNew();
+        var g2s = graph2.CalculateSignature();
+        stopwatch2.Stop();
         var sameSignature = g1s == g2s;
 
-        var signatureTimeMessage = $"Signature calculation for graph1 took {stopwatch.ElapsedMilliseconds} ms.";
+        var signatureTimeMessage =
+            $"Signature calculations took {stopwatch1.ElapsedMilliseconds} and {stopwatch2.ElapsedMilliseconds} ms.";
 
         // Step 4: Check isomorphism
         string isomorphic;
-        try
-        {
-            isomorphic =
-                $"\nThe simple isomorphism algorithm says the graphs are {(SimpleIsomorphic.Compare(graph1, graph2) ? "isomorphic" : "not isomorphic")}.";
-        }
-        catch (Exception ex)
-        {
-            // ignored
-            isomorphic = "";
-        }
+        var areIsomorphic = SimpleIsomorphic.AreIsomorphic(graph1, graph2);
+        isomorphic =
+            areIsomorphic == null
+                ? ""
+                : $"The simple isomorphism algorithm says the graphs are {(areIsomorphic.Value ? "isomorphic" : "not isomorphic")}.\n";
 
         // Step 5: Display the final result
-        CompareResult.Text = $"{signatureTimeMessage}\n" +
+        CompareResult.Text = $"{isomorphic}{signatureTimeMessage}\n" +
                              (sameSignature
                                  ? "✅ The signatures match."
-                                 : "❌ The signatures are not identical.") + isomorphic;
+                                 : "❌ The signatures are not identical.");
+    }
+
+    private void OnGraph1Changed(object? sender, Graph g)
+    {
+        graph1 = g;
+        CompareSignatures();
+    }
+
+    private void OnGraph2Changed(object? sender, Graph g)
+    {
+        graph2 = g;
+        CompareSignatures();
     }
 }

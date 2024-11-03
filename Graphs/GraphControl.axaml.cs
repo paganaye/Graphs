@@ -1,86 +1,101 @@
+namespace Graphs;
+
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System;
+using System.Threading.Tasks;
 
-namespace Graphs
+public partial class GraphControl : UserControl
 {
-    public partial class GraphControl : UserControl
+    private Graph? _graph;
+
+    public event EventHandler<Graph>? GraphChanged;
+
+    public GraphControl()
     {
-        private Graph _graph;
+        InitializeComponent();
 
-        public GraphControl()
-        {
-            InitializeComponent();
+        // Initialiser le graphe par défaut
+        _ = UpdateGraph();
 
-            // Initialiser le graphe par défaut
+        // Souscrire les événements des boutons
+        RandomGraphButton.Click += OnRandomGraphButtonClick;
+        ShuffleButton.Click += OnShuffleButtonClick;
+        NodeCountControl.ValueChanged += OnNodeCountChanged;
+        EdgeListTextBox.TextChanged += OnGraph6TextBoxChanged;
+    }
 
-            // Souscrire les événements des boutons
-            RandomGraphButton.Click += OnRandomGraphButtonClick;
-            ShuffleButton.Click += OnShuffleButtonClick;
-            NodeCountControl.ValueChanged += OnNodeCountChanged;
-            Graph6TextBox.TextChanged += OnGraph6TextBoxChanged;
-            UpdateGraph();
-        }
-
-
-        public void SetGraph(Graph graph)
+    public async void SetGraph(Graph graph)
+    {
+        if (!graph.Equals(_graph))
         {
             _graph = graph;
-            UpdateGraph();
+            await UpdateGraph();
+            GraphChanged?.Invoke(this, _graph);
         }
+    }
 
-        private void OnRandomGraphButtonClick(object sender, RoutedEventArgs e)
+    private void OnRandomGraphButtonClick(object sender, RoutedEventArgs e)
+    {
+        CreateRandomGraph(((double)(FillControl.Value ?? decimal.Zero)) / 100.0);
+    }
+
+    private void OnShuffleButtonClick(object sender, RoutedEventArgs e)
+    {
+        ShuffleGraph();
+    }
+
+    private void OnNodeCountChanged(object sender, NumericUpDownValueChangedEventArgs e)
+    {
+        if (_graph == null) return;
+        if (e.NewValue is { } newCount && newCount != _graph.NodeCount)
         {
-            CreateRandomGraph();
+            SetGraph(GraphResizer.Resize(_graph, (int)newCount));
         }
+    }
 
-        private void OnShuffleButtonClick(object sender, RoutedEventArgs e)
+    private void CreateRandomGraph(double fill)
+    {
+        if (_graph == null) return;
+        SetGraph(GraphRandomizer.RandomGraph(_graph.NodeCount, fill));
+    }
+
+    private void ShuffleGraph()
+    {
+        if (_graph == null) return;
+        SetGraph(GraphShuffler.Shuffled(_graph));
+    }
+
+    private void OnGraph6TextBoxChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (_graph == null) return;
+        try
         {
-            ShuffleGraph();
+            var edgeList = EdgeListTextBox.Text ?? "";
+            var newGraph = EdgeList.Deserialize((int)(NodeCountControl.Value ?? Decimal.Zero), edgeList);
+            SetGraph(newGraph);
         }
-
-        private void OnNodeCountChanged(object sender, NumericUpDownValueChangedEventArgs e)
+        catch
         {
-            if (e.NewValue is { } newCount && newCount != _graph.NodeCount)
-            {
-                GraphResizer.SetNodeCount(_graph, (int)newCount);
-                UpdateGraph();
-            }
+            // ignored
         }
+    }
 
-        private void CreateRandomGraph()
-        {
-            GraphRandomizer.FillRandomAdjacencies(_graph);
-            UpdateGraph();
-        }
+    private async Task UpdateGraph()
+    {
+        if (_graph == null) return;
 
-        private void ShuffleGraph()
-        {
-            GraphShuffler.ShuffleGraph(_graph);
-            UpdateGraph();
-        }
+        EdgeListTextBox.IsEnabled = false;
+        GraphSignatureTextBox.IsEnabled = false;
+        await Task.Delay(1);
 
-        private void OnGraph6TextBoxChanged(object? sender, TextChangedEventArgs e)
-        {
-            try
-            {
-                Graph6.Deserialize(this._graph, Graph6TextBox.Text ?? "");
-                UpdateGraph();
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-
-
-        private void UpdateGraph()
-        {
-            if (_graph == null) return;
-            GraphView.Content = new GraphView(_graph);
-            Graph6TextBox.Text = Graph6.Serialize(_graph);
-            NodeCountControl.Value = _graph.NodeCount;
-            GraphSignatureTextBox.Text = new GraphSignature(_graph).ToString();
-        }
+        NodeCountControl.Value = _graph.NodeCount;
+        EdgeListTextBox.Text = EdgeList.Serialize(_graph);
+        EdgeListTextBox.IsEnabled = true;
+        await Task.Delay(1);
+        GraphView.Content = new GraphView(_graph);
+        await Task.Delay(1);
+        GraphSignatureTextBox.Text = new GraphSignature(_graph).ToString();
+        GraphSignatureTextBox.IsEnabled = true;
     }
 }

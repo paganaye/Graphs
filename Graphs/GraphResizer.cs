@@ -1,23 +1,24 @@
-namespace  Graphs;
+namespace Graphs;
+
 using System;
 
-internal class GraphResizer
+internal static class GraphResizer
 {
-
-    public static void SetNodeCount(Graph graph, int newCount)
+    public static Graph Resize(Graph graph, int newCount)
     {
-        var clone = graph.Clone();
-        graph.SetNodeCount(newCount);
-        var minCount = Math.Min(clone.NodeCount, newCount);
+        var clone = new GraphBuilder(newCount);
+        var minCount = Math.Min(graph.NodeCount, newCount);
         for (int j = 0; j < minCount; j++)
         {
-            for (int i =0; i < j; i++)
+            for (int i = 0; i < j; i++)
             {
-                if (clone.HasEdge(i, j))
+                if (graph.HasEdge(i, j))
                 {
-                    graph.SetEdge(i, j, true);
+                    clone.SetEdge(i, j, true);
                 }
             }
         }
+
+        return clone.Build();
     }
 }

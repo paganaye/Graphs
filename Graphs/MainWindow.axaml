@@ -15,8 +15,8 @@
             <TextBlock x:Name="CompareResult" Text="" Margin="10,0,10,0" VerticalAlignment="Center" />
         </DockPanel>
         <Grid ColumnDefinitions="*,*">
-            <graphs:GraphControl x:Name="GraphControl1" Grid.Column="0" />
-            <graphs:GraphControl x:Name="GraphControl2" Grid.Column="1" />
+            <graphs:GraphControl x:Name="GraphControl1" Grid.Column="0" GraphChanged="OnGraph1Changed" />
+            <graphs:GraphControl x:Name="GraphControl2" Grid.Column="1" GraphChanged="OnGraph2Changed" />
         </Grid>
     </DockPanel>
 

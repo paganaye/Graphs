@@ -43,7 +43,7 @@ public static class EdgeName
         return Get(edgeIndex);
     }
 
-    public static string Get(char node1Name, char node2Name)
+    public static string Get(string node1Name, string node2Name)
     {
         int node1Index = NodeName.GetIndex(node1Name);
         int node2Index = NodeName.GetIndex(node2Name);

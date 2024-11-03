@@ -1,60 +1,86 @@
+namespace Graphs;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using Graphs;
-using Tmds.DBus.Protocol;
 
 public class GraphSignature
 {
     private readonly Graph _graph;
-    private readonly SigComparer _sigComparer = new SigComparer();
+    private readonly bool _inverted;
+    private readonly SigComparer _sigComparer = new();
 
-    public List<Sig> UnsortedNodeSignatures { get; private set; }
-    public List<Sig> SortedNodeSignatures { get; private set; }
+    private List<Sig> _unsortedNodeSignatures = [];
+    private List<Sig> _signature = [];
+
+    public List<Sig> UnsortedNodeSignatures => _unsortedNodeSignatures;
+    public List<Sig> Signature => _signature;
 
     public GraphSignature(Graph graph)
     {
-        _graph = graph;
+        _inverted = (graph.GetActiveEdgeCount() > graph.MaxEdgeCount / 2);
+        _graph = _inverted ? graph.Invert() : graph;
 
-        UnsortedNodeSignatures = InitializeBaseSignatures(graph);
-        int pass = 1;
+        InitializeBaseSignatures();
         do
         {
-            Console.WriteLine($"Pass: {pass}");
-            var groupedSignatures = SortAndGroupSignatures();
-            Console.WriteLine(
-                $"Found {groupedSignatures.Count} groups of {String.Join(" ",
-                    groupedSignatures.Select(g => g.Count))}");
-            if (!ExpandAmbiguousGroups(groupedSignatures))
-            {
-                Console.WriteLine("No expansion are possible, we have a symetry in the graph.");
-                break;
-            }
+            var groupedSignatures = GroupSignatures();
+            if (!ExpandAmbiguousGroups(groupedSignatures)) break;
         } while (!AreSignaturesUnique());
 
-        UpdateSortedNodeSignatures();
-        Console.WriteLine("Final signatures:", this.ToString());
+        RemoveRedundantSignatures();
     }
 
-    private void UpdateSortedNodeSignatures()
+
+    private List<Sig> GetSortedNodeSignatures()
     {
-        SortedNodeSignatures = UnsortedNodeSignatures.OrderBy(s => s, _sigComparer).ToList();
+        return _unsortedNodeSignatures.OrderBy(s => s, _sigComparer).ToList();
     }
 
-    private List<Sig> InitializeBaseSignatures(Graph graph)
+    private void RemoveRedundantSignatures()
     {
-        return graph.ForEachNode()
-            .Select(nodeIndex => new CollapsedSig(nodeIndex, graph.GetNeighborCount(nodeIndex)) { Node = nodeIndex })
+        var visitedNodes = new bool[_graph.NodeCount];
+        var filteredSignatures = new List<Sig>();
+
+        var sortedSignatures = GetSortedNodeSignatures();
+        foreach (var signature in sortedSignatures)
+        {
+            if (!visitedNodes[signature.Node])
+            {
+                filteredSignatures.Add(signature);
+                MarkNodesAsVisited(signature);
+            }
+        }
+
+        _signature = filteredSignatures;
+
+        void MarkNodesAsVisited(Sig sig)
+        {
+            if (visitedNodes[sig.Node]) return;
+            visitedNodes[sig.Node] = true;
+            if (sig is ExpandedSig expandedSig)
+            {
+                foreach (var child in expandedSig.Children)
+                {
+                    MarkNodesAsVisited(child);
+                }
+            }
+        }
+    }
+
+
+    private void InitializeBaseSignatures()
+    {
+        _unsortedNodeSignatures = _graph.ForEachNode()
+            .Select(nodeIndex => new CollapsedSig(nodeIndex, _graph.GetNeighborCount(nodeIndex)) { Node = nodeIndex })
             .Cast<Sig>()
             .ToList();
     }
 
-    private List<List<Sig>> SortAndGroupSignatures()
+    private List<List<Sig>> GroupSignatures()
     {
-        return UnsortedNodeSignatures
+        return _unsortedNodeSignatures
             .GroupBy(sig => sig, (key, group) => group.ToList(), _sigComparer)
-            .Where(group => group.Count > 1)
             .ToList();
     }
 
@@ -64,16 +90,13 @@ public class GraphSignature
 
         foreach (var group in groupedSignatures.Where(it => it.Count > 1))
         {
-            Console.WriteLine("Expanding group of ", group[0].ToString());
             for (int i = 0; i < group.Count; i++)
             {
                 var sig = group[i];
-                Console.WriteLine("Sig", sig);
                 var hasExpanded = ExpandSignatureTree(ref sig);
                 if (hasExpanded)
                 {
-                    Console.WriteLine("=>", sig);
-                    UnsortedNodeSignatures[sig.Node] = sig;
+                    _unsortedNodeSignatures[sig.Node] = sig;
                     expanded = true;
                 }
             }
@@ -87,7 +110,7 @@ public class GraphSignature
         bool expanded = false;
         var visited = new int[_graph.NodeCount];
 
-        void Dfs(int level, ref Sig currentSig)
+        bool Dfs(int level, ref Sig currentSig)
         {
             if (currentSig is CollapsedSig collapsedSig)
             {
@@ -104,19 +127,22 @@ public class GraphSignature
 
                 currentSig = new ExpandedSig(currentSig.Node, children.ToArray());
                 expanded = true;
+                return true;
             }
             else if (currentSig is ExpandedSig expandedSig)
             {
                 visited[currentSig.Node] = level;
+                bool modified = false;
                 for (int i = 0; i < expandedSig.Children.Length; i++)
                 {
-                    Dfs(level + 1, ref expandedSig.Children[i]);
+                    modified |= Dfs(level + 1, ref expandedSig.Children[i]);
                 }
 
-                Array.Sort(expandedSig.Children, _sigComparer);
-
+                if (modified) Array.Sort(expandedSig.Children, _sigComparer);
                 visited[currentSig.Node] = 0;
+                return modified;
             }
+            else return false;
         }
 
         Dfs(1, ref sig);
@@ -125,14 +151,11 @@ public class GraphSignature
 
     private bool AreSignaturesUnique()
     {
-        UpdateSortedNodeSignatures();
-
-        for (int i = 1; i < SortedNodeSignatures.Count; i++)
+        var currentSignatures = GetSortedNodeSignatures();
+        for (int i = 1; i < currentSignatures.Count; i++)
         {
-            if (_sigComparer.Compare(SortedNodeSignatures[i], SortedNodeSignatures[i - 1]) == 0)
-            {
+            if (_sigComparer.Compare(currentSignatures[i], currentSignatures[i - 1]) == 0)
                 return false;
-            }
         }
 
         return true;
@@ -140,19 +163,53 @@ public class GraphSignature
 
     public override string ToString()
     {
-        return "[" + string.Join(",", SortedNodeSignatures.Select(s => s.ToString())) + "]";
+        return $"{(_inverted ? "!" : "")}[{string.Join(",", _signature.Select(s => s.ToString()))}]";
     }
 
     public string DebugSig()
     {
-        return "[" + string.Join(",", SortedNodeSignatures.Select(s => s.DebugSig())) + "]";
+        return $"{(_inverted ? "!" : "")}[{string.Join(",", _signature.Select(s => s.DebugSig()))}]";
     }
 }
 
-public static class GraphExtensions
+public static partial class GraphExtensions
 {
-    public static string Signature(this Graph graph)
+    public static string CalculateSignature(this Graph graph)
     {
         return new GraphSignature(graph).ToString();
+    }
+
+    public static Graph Invert(this Graph graph)
+    {
+        var count = graph.NodeCount;
+        var newGraph = new GraphBuilder(count);
+        for (int j = 1; j < count; j++)
+        {
+            for (int i = 0; i < j; i++)
+            {
+                if (!graph.HasEdge(i, j))
+                {
+                    newGraph.SetEdge(i, j, true);
+                }
+            }
+        }
+
+        return newGraph.Build();
+    }
+
+    public static int GetActiveEdgeCount(this Graph? graph)
+    {
+        if (graph == null) return 0;
+        int count = 0;
+        foreach (int node in graph.ForEachNode())
+        {
+            foreach (int neighbor in graph.ForEachNeighbor(node))
+            {
+                if (neighbor < node) count++;
+                else break;
+            }
+        }
+
+        return count;
     }
 }

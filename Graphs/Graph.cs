@@ -4,89 +4,127 @@ using System.Linq;
 
 namespace Graphs;
 
+using System.Collections.Generic;
+
 public class Graph
 {
-    private int _nodeCount;
-    private int _edgeCount;
-    private bool[] _edges;
+    private readonly bool[,] _edges;
+    private readonly int[] _neighborsCount;
+    private readonly int[][] _neighbors;
+    public int ActiveEdges { get; private set; }
 
-    public Graph(int nodeCount)
+
+    public Graph(GraphBuilder builder)
     {
-        SetNodeCount(nodeCount);
+        NodeCount = builder.NodeCount;
+        MaxEdgeCount = (NodeCount * (NodeCount - 1)) / 2;
+        _edges = new bool[NodeCount, NodeCount];
+        InitEdges(builder);
+        _neighbors = new int[NodeCount][];
+        _neighborsCount = new int[NodeCount];
+        PrecomputeNeighbors();
     }
 
-    public int NodeCount => _nodeCount;
-    public int EdgeCount => _edgeCount;
-
-    // SetNodeCount: This method allows changing the number of nodes dynamically
-    public void SetNodeCount(int nodeCount)
+    private void InitEdges(GraphBuilder builder)
     {
-        if (nodeCount < 1 || nodeCount > 52)
+        this.ActiveEdges = 0;
+        for (var j = 1; j < NodeCount; j++)
         {
-            throw new ArgumentException("Node count must be between 1 and 52.");
+            for (var i = 0; i < j; i++)
+            {
+                if (builder.HasEdge(i, j))
+                {
+                    _edges[i, j] = true;
+                    _edges[j, i] = true;
+                    this.ActiveEdges += 1;
+                }
+            }
         }
-
-        _nodeCount = nodeCount;
-        _edgeCount = nodeCount * (nodeCount - 1) / 2;
-        _edges = new bool[_edgeCount];
     }
 
-    public void SetEdge(char node1, char node2, bool value)
-    {
-        int edgeIndex = EdgeName.GetEdgeIndex(node1, node2);
-        _edges[edgeIndex] = value;
-    }
+    public int NodeCount { get; }
 
-    public void SetEdge(int node1, int node2, bool value)
-    {
-        int edgeIndex = EdgeName.GetEdgeIndex(node1, node2);
-        _edges[edgeIndex] = value;
-    }
-
-    public bool HasEdge(char node1, char node2)
-    {
-        int edgeIndex = EdgeName.GetEdgeIndex(node1, node2);
-        return _edges[edgeIndex];
-    }
+    public int MaxEdgeCount { get; }
 
     public bool HasEdge(int node1Index, int node2Index)
     {
-        int edgeIndex = EdgeName.GetEdgeIndex(node1Index, node2Index);
-        return edgeIndex >= 0 && _edges[edgeIndex];
+        if (node1Index == node2Index) return false;
+        if (node1Index < 0 || node1Index >= NodeCount || node2Index < 0 || node2Index >= NodeCount)
+        {
+            throw new ArgumentOutOfRangeException("Node indices must be within the valid range.");
+        }
+
+        return _edges[node1Index, node2Index];
     }
 
-    public Graph Clone()
+    public int GetNeighborCount(int nodeIndex)
     {
-        Graph result = new Graph(this._nodeCount);
-        Array.Copy(this._edges, result._edges, this._edges.Length);
-        return result;
+        return _neighborsCount[nodeIndex];
+    }
+
+    public IEnumerable<int> ForEachNeighbor(int nodeIndex)
+    {
+        return _neighbors[nodeIndex];
+    }
+
+
+    private void PrecomputeNeighbors()
+    {
+        for (int i = 0; i < NodeCount; i++)
+        {
+            List<int> nodeNeighbors = new List<int>();
+            for (int j = 0; j < NodeCount; j++)
+            {
+                if (i != j && _edges[i, j])
+                {
+                    nodeNeighbors.Add(j);
+                }
+            }
+
+            _neighbors[i] = nodeNeighbors.ToArray();
+            _neighborsCount[i] = _neighbors[i].Length;
+        }
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is Graph otherGraph)
+            return Equals(otherGraph);
+
+        return false;
+    }
+
+    public bool Equals(Graph? other)
+    {
+        if (other is null)
+            return false;
+
+        if (ReferenceEquals(this, other))
+            return true;
+
+        if (NodeCount != other.NodeCount || MaxEdgeCount != other.MaxEdgeCount)
+            return false;
+
+        for (int j = 0; j < NodeCount; j++)
+        {
+            for (int i = 0; i < j; i++)
+            {
+                if (_edges[i, j] != other._edges[i, j])
+                    return false;
+            }
+        }
+
+        return true;
     }
 }
 
-
-public static class GraphExtensions
+public static partial class GraphExtensions
 {
-    public static int GetNeighborCount(this Graph graph, int nodeIndex)
-    {
-        return graph.ForEachNeighbor(nodeIndex).Count();
-    }
-
     public static IEnumerable<int> ForEachNode(this Graph graph)
     {
         for (int i = 0; i < graph.NodeCount; i++)
         {
             yield return i;
-        }
-    }
-
-    public static IEnumerable<int> ForEachNeighbor(this Graph graph, int nodeIndex)
-    {
-        for (int i = 0; i < graph.NodeCount; i++)
-        {
-            if (i != nodeIndex && graph.HasEdge(nodeIndex, i))
-            {
-                yield return i;
-            }
         }
     }
 }

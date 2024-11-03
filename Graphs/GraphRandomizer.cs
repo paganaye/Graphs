@@ -1,24 +1,24 @@
+namespace Graphs;
+
 using System;
 
-namespace Graphs
+public static class GraphRandomizer
 {
-    public static class GraphRandomizer
+    private static Random _random = new Random();
+
+    // Remplit la matrice d'adjacence d'un graphe avec des valeurs aléatoires 0 ou 1
+    public static Graph RandomGraph(int nodeCount, double fill = 0.5)
     {
-        private static Random _random = new Random();
-
-        // Remplit la matrice d'adjacence d'un graphe avec des valeurs aléatoires 0 ou 1
-        public static void FillRandomAdjacencies(Graph graph)
+        GraphBuilder newGraph = new(nodeCount);
+        for (int j = 1; j < nodeCount; j++)
         {
-            int nodeCount = graph.NodeCount;
-
-            for (int i = 0; i < nodeCount; i++)
+            for (int i = 0; i < j; i++)
             {
-                for (int j = 0; j < i; j++)
-                {
-                    bool isConnected = _random.Next(2) == 1;
-                    graph.SetEdge(i, j, isConnected);
-                }
+                bool isConnected = _random.NextDouble() < fill;
+                if (isConnected) newGraph.SetEdge(i, j, true);
             }
         }
+
+        return newGraph.Build();
     }
 }

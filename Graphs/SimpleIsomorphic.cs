@@ -3,17 +3,16 @@ using System.Collections.Generic;
 
 namespace Graphs;
 
+// This is a brute force comparer.
+// It is just there to compare with the real signature algorithm on small graphs
+// it is not used by the rest of the program.
 internal static class SimpleIsomorphic
 {
-    public static bool Compare(Graph graph1, Graph graph2)
-    {
-        return AreIsomorphic(graph1, graph2);
-    }
 
-    public static bool AreIsomorphic(Graph graph1, Graph graph2)
+    public static bool? AreIsomorphic(Graph graph1, Graph graph2)
     {
         if (graph1.NodeCount != graph2.NodeCount) return false;
-        if (graph1.NodeCount > 10) throw new Exception("SimpleIsomorphic only supports up to 10 nodes");
+        if (graph1.NodeCount > 10) return null;
 
         var permutations = GeneratePermutations(graph1.NodeCount);
         foreach (var permutation in permutations)
