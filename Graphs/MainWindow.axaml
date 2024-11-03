@@ -8,10 +8,12 @@
         Title="Graphs">
 
     <DockPanel>
-        <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Stretch" Orientation="Horizontal">
-            <Button x:Name="CompareButton" Content="Compare" />
-            <TextBlock x:Name="CompareResult" Text="" Margin="10,0,10,0" VerticalAlignment="Center" Width="400" />
-        </StackPanel>
+
+        <DockPanel DockPanel.Dock="Bottom" HorizontalAlignment="Stretch">
+
+            <Button DockPanel.Dock="Left" x:Name="CompareButton" Content="Compare" />
+            <TextBlock x:Name="CompareResult" Text="" Margin="10,0,10,0" VerticalAlignment="Center" />
+        </DockPanel>
         <Grid ColumnDefinitions="*,*">
             <graphs:GraphControl x:Name="GraphControl1" Grid.Column="0" />
             <graphs:GraphControl x:Name="GraphControl2" Grid.Column="1" />

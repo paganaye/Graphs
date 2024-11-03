@@ -24,50 +24,49 @@ public partial class MainWindow : Window
     private async void OnCompareButtonClick(object sender, RoutedEventArgs e)
     {
         CompareResult.Text = "...";
-        await Task.Delay(1); // Laisser le temps à l'interface de se mettre à jour
+        await Task.Delay(1); // Allow the UI to update
 
+        // Step 1: Check if the graphs have the same number of nodes
         if (graph1.NodeCount != graph2.NodeCount)
         {
             CompareResult.Text = "The graphs have different numbers of nodes and cannot be compared directly.";
             return;
         }
 
+        // Step 2: Check if the graphs are identical
         bool areIdentical = GraphComparer.Compare(graph1, graph2);
-
         if (areIdentical)
         {
             CompareResult.Text = "The graphs are identical!";
+            return;
         }
-        else
-        {
-            var g1s = graph1.Signature();
-            var g2s = graph2.Signature();
-            var sameSignature = g1s == g2s;
 
-            try
-            {
-                if (SimpleIsomorphic.Compare(graph1, graph2))
-                {
-                    CompareResult.Text = "The graphs are isomorphic" +
-                                         (sameSignature
-                                             ? " and the signatures match."
-                                             : " but the signatures are not identical.");
-                }
-                else
-                {
-                    CompareResult.Text = "The graphs are different " +
-                                         (sameSignature
-                                             ? " but the signatures match."
-                                             : " and the signatures are not identical.");
-                }
-            }
-            catch (Exception ex)
-            {
-                CompareResult.Text = ex.Message +
-                                     (sameSignature
-                                         ? " - \u2705 The signatures match."
-                                         : " - \u274c The signatures are not identical.");
-            }
+        // Step 3: Calculate and display the signature for each graph, with timing
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        var g1s = graph1.Signature();
+        stopwatch.Stop();
+        var g2s = graph2.Signature();
+        var sameSignature = g1s == g2s;
+
+        var signatureTimeMessage = $"Signature calculation for graph1 took {stopwatch.ElapsedMilliseconds} ms.";
+
+        // Step 4: Check isomorphism
+        string isomorphic;
+        try
+        {
+            isomorphic =
+                $"\nThe simple isomorphism algorithm says the graphs are {(SimpleIsomorphic.Compare(graph1, graph2) ? "isomorphic" : "not isomorphic")}.";
         }
+        catch (Exception ex)
+        {
+            // ignored
+            isomorphic = "";
+        }
+
+        // Step 5: Display the final result
+        CompareResult.Text = $"{signatureTimeMessage}\n" +
+                             (sameSignature
+                                 ? "✅ The signatures match."
+                                 : "❌ The signatures are not identical.") + isomorphic;
     }
 }
