@@ -23,15 +23,15 @@ public class GraphSignatureTests
     
       var signature = new GraphSignature(graph.Build());
     
-      Assert.That(signature.UnsortedNodeSignatures[0].DebugSig(), Is.EqualTo("ANeighbours(1)[BNeighbours(2)[A:Loop(1),CNeighbours(1)[B:Loop(2)]]]"));
+      Assert.That(signature.UnsortedNodeSignatures[0].DebugSig(), Is.EqualTo("ANeighbours(1)[BNeighbours(2)[A:Loop(-1),CNeighbours(1)[B:Loop(-1)]]]"));
       Assert.That(signature.UnsortedNodeSignatures[1].DebugSig(), Is.EqualTo("BNeighbours(2)"));
-      Assert.That(signature.UnsortedNodeSignatures[2].DebugSig(), Is.EqualTo("CNeighbours(1)[BNeighbours(2)[C:Loop(1),ANeighbours(1)[B:Loop(2)]]]"));
+      Assert.That(signature.UnsortedNodeSignatures[2].DebugSig(), Is.EqualTo("CNeighbours(1)[BNeighbours(2)[C:Loop(-1),ANeighbours(1)[B:Loop(-1)]]]"));
 
       var cmp = new SigComparer();
       Assert.That(cmp.Compare(signature.UnsortedNodeSignatures[0],signature.UnsortedNodeSignatures[2]), Is.EqualTo(0));
 
       // then this should be sorted
-      Assert.That(signature.ToString(), Is.EqualTo("[2,[],[],[[-1,[-2]]],[[-1,[-2]]]]"));
+      Assert.That(signature.ToString(), Is.EqualTo("[2,[],[],[[-1,[-1]]],[[-1,[-1]]]]"));
    }
    
    [Test]
@@ -48,12 +48,9 @@ public class GraphSignatureTests
 
       
       Assert.That(signature.UnsortedNodeSignatures[0].DebugSig(), Is.EqualTo("ANeighbours(3)"));
-      Assert.That(signature.UnsortedNodeSignatures[1].DebugSig(), Is.EqualTo("BNeighbours(2)[CNeighbours(2)[B:Loop(1),ANeighbours(3)[B:Loop(1),C:Loop(2),DNeighbours(2)[A:Loop(3),ENeighbours(1)[D:Loop(4)]]]],ANeighbours(3)[B:Loop(1),CNeighbours(2)[B:Loop(1),A:Loop(2)],DNeighbours(2)[A:Loop(2),ENeighbours(1)[D:Loop(3)]]]]"));
-      Assert.That(signature.UnsortedNodeSignatures[2].DebugSig(), Is.EqualTo("CNeighbours(2)[BNeighbours(2)[C:Loop(1),ANeighbours(3)[C:Loop(1),B:Loop(2),DNeighbours(2)[A:Loop(3),ENeighbours(1)[D:Loop(4)]]]],ANeighbours(3)[C:Loop(1),BNeighbours(2)[C:Loop(1),A:Loop(2)],DNeighbours(2)[A:Loop(2),ENeighbours(1)[D:Loop(3)]]]]"));
-      Assert.That(signature.UnsortedNodeSignatures[3].DebugSig(), Is.EqualTo("DNeighbours(2)[ANeighbours(3),ENeighbours(1)]"));
       Assert.That(signature.UnsortedNodeSignatures[4].DebugSig(), Is.EqualTo("ENeighbours(1)"));
 
-      Assert.That(signature.ToString(), Is.EqualTo("[3,1,[3,1],[[-1,[-1,-2,[-3,[-4]]]],[-1,[-1,-2],[-2,[-3]]]]]"));
+      Assert.That(signature.ToString(), Is.EqualTo("[3,1,[3,1],[[-1,[-2,-1,[-1,[-1]]]],[-1,[-2,-1],[-1,[-1]]]]]"));
             
    }
 

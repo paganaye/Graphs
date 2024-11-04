@@ -15,21 +15,21 @@ public class SigTests
     [Test]
     public void LinkSig_with_longer_loop_comes_first()
     {
-        var signatures = GetSignature(new LoopSig(0, 1), new LoopSig(1, 2));
-        Assert.That(signatures, Is.EqualTo("[-1,-2]"));
+        var signatures = GetSignature(new LoopSig(0, -1), new LoopSig(1, -2));
+        Assert.That(signatures, Is.EqualTo("[-2,-1]"));
     }
 
     [Test]
     public void LinkSig_comes_before_collapsed_sig()
     {
-        var signatures = GetSignature(new LoopSig(0, 1), new CollapsedSig(1, 2));
+        var signatures = GetSignature(new LoopSig(0, -1), new CollapsedSig(1, 2));
         Assert.That(signatures, Is.EqualTo("[-1,2]"));
     }
 
     [Test]
     public void LinkSig_comes_before_expanded_sig()
     {
-        var signatures = GetSignature(new LoopSig(0, 1), new ExpandedSig(1, []));
+        var signatures = GetSignature(new LoopSig(0, -1), new ExpandedSig(1, []));
         Assert.That(signatures, Is.EqualTo("[-1,[]]"));
     }
 
@@ -72,8 +72,8 @@ public class SigTests
     public void ExpandedSig_with_same_length_but_different_elements()
     {
         var signatures = GetSignature(
-            new ExpandedSig(0, new Sig[] { new CollapsedSig(1, 2), new LoopSig(2, 1) }),
-            new ExpandedSig(0, new Sig[] { new CollapsedSig(1, 1), new LoopSig(2, 1) })
+            new ExpandedSig(0, new Sig[] { new CollapsedSig(1, 2), new LoopSig(2, -1) }),
+            new ExpandedSig(0, new Sig[] { new CollapsedSig(1, 1), new LoopSig(2, -1) })
         );
         Assert.That(signatures, Is.EqualTo("[[2,-1],[1,-1]]"));
     }
@@ -109,10 +109,10 @@ public class SigTests
     public void ExpandedSig_with_different_LinkSig_levels()
     {
         var signatures = GetSignature(
-            new ExpandedSig(0, new Sig[] { new LoopSig(1, 2), new LoopSig(2, 1) }),
-            new ExpandedSig(0, new Sig[] { new LoopSig(1, 1), new LoopSig(2, 2) })
+            new ExpandedSig(0, new Sig[] { new LoopSig(1, -2), new LoopSig(2, -1) }),
+            new ExpandedSig(0, new Sig[] { new LoopSig(1, -1), new LoopSig(2, -2) })
         );
-        Assert.That(signatures, Is.EqualTo("[[-1,-2],[-2,-1]]"));
+        Assert.That(signatures, Is.EqualTo("[[-2,-1],[-1,-2]]"));
     }
 
     [Test]

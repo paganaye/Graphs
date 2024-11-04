@@ -9,7 +9,7 @@ public class EdgeListTests
     [Test]
     public void TestSimpleEdgeListGraph()
     {
-        var list = "(1,2),(3,5),(4,9),(7,8),(7,9)";
+        var list = "(1,2),(3,5),(7,8),(4,9),(7,9)";
         var newGraph = EdgeList.Deserialize(10, list);
         var newList = EdgeList.Serialize(newGraph);
         Assert.That(newList, Is.EqualTo(list));

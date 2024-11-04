@@ -118,7 +118,7 @@ public class GraphSignature
                 foreach (var neighbor in _graph.ForEachNeighbor(currentSig.Node))
                 {
                     if (visited[neighbor] > 0)
-                        children.Add(new LoopSig(neighbor, visited[neighbor]));
+                        children.Add(new LoopSig(neighbor, visited[neighbor] - level));
                     else
                         children.Add(new CollapsedSig(neighbor, _graph.GetNeighborCount(neighbor)));
                 }

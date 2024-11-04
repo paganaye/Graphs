@@ -1,4 +1,5 @@
 using System;
+using System.Reflection.Emit;
 
 namespace Graphs;
 
@@ -48,20 +49,26 @@ public class ExpandedSig(int node, Sig[] children) : Sig(node)
     public override int Order => 2;
 }
 
-public class LoopSig(int node, int loop) : Sig(node)
+public class LoopSig : Sig
 {
-    public int Loop { get; } = loop;
+    public LoopSig(int node, int loop) : base(node)
+    {
+        if (loop >= 0) throw new InvalidProgramException("Loops should be negative");
+        this.Loop = loop;
+    }
+
+    public int Loop { get; }
 
     public override string ToString()
     {
-        return (-Loop).ToString();
+        return (Loop).ToString();
     }
 
     public override int Order => 3;
 
     public override string DebugSig()
     {
-        return $"{NodeName.Get(node)}:Loop({Loop})";
+        return $"{NodeName.Get(Node)}:Loop({Loop})";
     }
 }
 
