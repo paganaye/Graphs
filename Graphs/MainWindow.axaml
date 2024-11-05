@@ -6,18 +6,13 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Graphs.MainWindow"
         Title="Graphs">
-
-    <DockPanel>
-
-        <DockPanel DockPanel.Dock="Bottom" HorizontalAlignment="Stretch">
-
-            <Button DockPanel.Dock="Left" x:Name="CompareButton" Content="Compare" />
-            <TextBlock x:Name="CompareResult" Text="" Margin="10,0,10,0" VerticalAlignment="Center" />
-        </DockPanel>
-        <Grid ColumnDefinitions="*,*">
-            <graphs:GraphControl x:Name="GraphControl1" Grid.Column="0" GraphChanged="OnGraph1Changed" />
-            <graphs:GraphControl x:Name="GraphControl2" Grid.Column="1" GraphChanged="OnGraph2Changed" />
-        </Grid>
-    </DockPanel>
+    <TabControl>
+        <TabItem Header="Lazy Button-Pushing">
+            <graphs:Research  />
+        </TabItem>
+        <TabItem Header="Manual Labour">
+            <graphs:GraphPairViewer />
+        </TabItem>
+    </TabControl>
 
 </Window>

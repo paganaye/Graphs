@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:graphs="clr-namespace:Graphs"
+             x:Class="Graphs.Research"
+             Background="#222">
+    <DockPanel>
+
+        <DockPanel DockPanel.Dock="Bottom" HorizontalAlignment="Stretch">
+            <TextBlock x:Name="Info" Text="" Margin="10,0,10,0" VerticalAlignment="Center" MaxLines="20"
+                       TextWrapping="Wrap" />
+            <ProgressBar DockPanel.Dock="Bottom" x:Name="ProgressBar1" Minimum="0" Maximum="100" Height="20" />
+        </DockPanel>
+        <Grid ColumnDefinitions="*,*">
+            <DockPanel x:Name="Panel1" Grid.Column="0" LastChildFill="True">
+                <TextBlock FontWeight="Bold" DockPanel.Dock="Top">Brute force</TextBlock>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button3_OnClick">3 nodes</Button>
+                    <TextBlock Name="Button3Text"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button4_OnClick">4 nodes</Button>
+                    <TextBlock Name="Button4Text"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button5_OnClick">5 nodes</Button>
+                    <TextBlock Name="Button5Text"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button6_OnClick">6 nodes</Button>
+                    <TextBlock Name="Button6Text"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button7_OnClick">7 nodes</Button>
+                    <TextBlock Name="Button7Text"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button8_OnClick">8 nodes</Button>
+                    <TextBlock Name="Button8Text"></TextBlock>
+                </DockPanel>
+                <TextBlock FontWeight="Bold" DockPanel.Dock="Top">Semi brute force</TextBlock>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button6S_OnClick">6 nodes (3+3)</Button>
+                    <TextBlock Name="Button6SText"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button7S_OnClick">7 nodes (3+4)</Button>
+                    <TextBlock Name="Button7SText"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button8S_OnClick">8 nodes (4+4)</Button>
+                    <TextBlock Name="Button8SText"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button9S_OnClick">9 nodes (4+5)</Button>
+                    <TextBlock Name="Button9SText"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button10S_OnClick">10 nodes (5+5)</Button>
+                    <TextBlock Name="Button10SText"></TextBlock>
+                </DockPanel>
+                <Panel></Panel>
+            </DockPanel>
+            <graphs:GraphControl x:Name="GraphControl1" Grid.Column="1" GraphChanged="OnGraph1Changed" />
+        </Grid>
+    </DockPanel>
+</UserControl>

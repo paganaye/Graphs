@@ -25,7 +25,7 @@ public partial class GraphControl : UserControl
         EdgeListTextBox.TextChanged += OnGraph6TextBoxChanged;
     }
 
-    public async void SetGraph(Graph graph)
+    public async Task SetGraph(Graph graph)
     {
         if (!graph.Equals(_graph))
         {

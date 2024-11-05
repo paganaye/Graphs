@@ -39,10 +39,12 @@ public class GraphBuilder
         {
             throw new ArgumentException("No loops allowed (i.e., edges from a node to itself).");
         }
+
         if (i > j)
         {
             (i, j) = (j, i);
         }
+
         _edges[j][i] = value;
     }
 
@@ -58,11 +60,13 @@ public class GraphBuilder
         {
             return false; // No loops
         }
+
         // Ensure i < j for the triangular matrix
         if (i > j)
         {
             (i, j) = (j, i);
         }
+
         return _edges[j][i];
     }
 
@@ -76,4 +80,11 @@ public class GraphBuilder
     }
 
 
+    public void Clear()
+    {
+        for (int j = 0; j < _nodeCount; j++)
+        {
+            Array.Fill(_edges[j], false);
+        }
+    }
 }
