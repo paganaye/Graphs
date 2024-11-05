@@ -10,7 +10,6 @@ public abstract class Sig(int node)
 {
     public int Node = node; // this is used only temporarily to build the Signatures then it is all cleared at the end.
     public abstract int Order { get; }
-    public abstract string DebugSig();
 }
 
 public class CollapsedSig(int node, int neighborCount) : Sig(node)
@@ -23,11 +22,7 @@ public class CollapsedSig(int node, int neighborCount) : Sig(node)
     }
 
     public override int Order => 1;
-
-    public override string DebugSig()
-    {
-        return $"{NodeName.Get(node)}Neighbours({NeighborCount})";
-    }
+    
 }
 
 public class ExpandedSig(int node, Sig[] children) : Sig(node)
@@ -39,13 +34,6 @@ public class ExpandedSig(int node, Sig[] children) : Sig(node)
         // ReSharper disable once CoVariantArrayConversion
         return $"[{string.Join(",", (object[])Children)}]";
     }
-
-    public override string DebugSig()
-    {
-        return
-            $"{NodeName.Get(node)}Neighbours({Children.Length})[{String.Join(",", children.Select(c => c.DebugSig()))}]";
-    }
-
     public override int Order => 2;
 }
 
@@ -66,10 +54,6 @@ public class LoopSig : Sig
 
     public override int Order => 3;
 
-    public override string DebugSig()
-    {
-        return $"{NodeName.Get(Node)}:Loop({Loop})";
-    }
 }
 
 public class SigComparer : IComparer<Sig>, IEqualityComparer<Sig>

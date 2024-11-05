@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graphs", ".\Graphs\Graphs.c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphsTests", ".\GraphsTests\GraphsTests.csproj", "{A74327FB-C633-4DE3-BC14-1EA20AC7E956}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5", "C5\C5\C5.csproj", "{99701418-3CF6-4691-AFD9-D7A2E38640B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{A74327FB-C633-4DE3-BC14-1EA20AC7E956}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A74327FB-C633-4DE3-BC14-1EA20AC7E956}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A74327FB-C633-4DE3-BC14-1EA20AC7E956}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99701418-3CF6-4691-AFD9-D7A2E38640B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99701418-3CF6-4691-AFD9-D7A2E38640B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99701418-3CF6-4691-AFD9-D7A2E38640B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99701418-3CF6-4691-AFD9-D7A2E38640B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

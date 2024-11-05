@@ -7,7 +7,8 @@
              x:Class="Graphs.GraphControl">
 
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" VerticalAlignment="Stretch" Orientation="Vertical" Margin="0,5">
+        <StackPanel Name="Controls" DockPanel.Dock="Top" VerticalAlignment="Stretch" Orientation="Vertical"
+                    Margin="0,5">
             <!-- Line 1 : Buttons -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,5">
                 <StackPanel Orientation="Horizontal" Grid.Column="0" Margin="5,0">
@@ -24,16 +25,27 @@
                 <Button x:Name="ShuffleButton" Content="Shuffle" Margin="5,0" />
             </StackPanel>
 
-            <!-- Line 2 : Edge list -->
             <Grid ColumnDefinitions="150,*" Margin="5,0,0,5">
-                <TextBlock Text="Edge List:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,5,0" />
-                <TextBox x:Name="EdgeListTextBox" Grid.Column="1" Height="25" />
+                <TextBlock Text="Graph6:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,5,0" />
+                <TextBox x:Name="Graph6TextBox" Grid.Column="1" />
             </Grid>
 
-            <!-- Line 3 : Graph signature -->
+            <Grid ColumnDefinitions="150,*" Margin="5,0,0,5">
+                <TextBlock Text="Adjacency list:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,5,0" />
+                <TextBox x:Name="AdjacencyTextBox" Grid.Column="1" TextWrapping="Wrap" AcceptsReturn="True"
+                         MinLines="2" MaxLines="10" />
+            </Grid>
+
+            <Grid ColumnDefinitions="150,*" Margin="5,0,0,5">
+                <TextBlock Text="Edge List:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,5,0" />
+                <TextBox x:Name="EdgeListTextBox" Grid.Column="1" TextWrapping="Wrap"
+                         MinLines="2" MaxLines="10" />
+            </Grid>
+
             <Grid ColumnDefinitions="150,*" Margin="5,0,0,5">
                 <TextBlock Text="Graph signature:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,5,0" />
-                <TextBox x:Name="GraphSignatureTextBox" Grid.Column="1" Height="25" IsReadOnly="True" />
+                <TextBox x:Name="GraphSignatureTextBox" Grid.Column="1" IsReadOnly="True"
+                         TextWrapping="Wrap" MinLines="2" MaxLines="10" />
             </Grid>
         </StackPanel>
 

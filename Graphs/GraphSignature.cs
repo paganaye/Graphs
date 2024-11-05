@@ -28,7 +28,7 @@ public class GraphSignature
             if (!ExpandAmbiguousGroups(groupedSignatures)) break;
         } while (!AreSignaturesUnique());
 
-        RemoveRedundantSignatures();
+        GetFinalSignatures();
     }
 
 
@@ -37,35 +37,39 @@ public class GraphSignature
         return _unsortedNodeSignatures.OrderBy(s => s, _sigComparer).ToList();
     }
 
-    private void RemoveRedundantSignatures()
+    private void GetFinalSignatures()
     {
         var visitedNodes = new bool[_graph.NodeCount];
         var filteredSignatures = new List<Sig>();
 
+
         var sortedSignatures = GetSortedNodeSignatures();
-        foreach (var signature in sortedSignatures)
-        {
-            if (!visitedNodes[signature.Node])
-            {
-                filteredSignatures.Add(signature);
-                MarkNodesAsVisited(signature);
-            }
-        }
 
-        _signature = filteredSignatures;
-
-        void MarkNodesAsVisited(Sig sig)
-        {
-            if (visitedNodes[sig.Node]) return;
-            visitedNodes[sig.Node] = true;
-            if (sig is ExpandedSig expandedSig)
-            {
-                foreach (var child in expandedSig.Children)
-                {
-                    MarkNodesAsVisited(child);
-                }
-            }
-        }
+        _signature = sortedSignatures;
+        
+        // foreach (var signature in sortedSignatures)
+        // {
+        //     if (!visitedNodes[signature.Node])
+        //     {
+        //         filteredSignatures.Add(signature);
+        //         MarkNodesAsVisited(signature);
+        //     }
+        // }
+        //
+        // _signature = filteredSignatures;
+        //
+        // void MarkNodesAsVisited(Sig sig)
+        // {
+        //     if (visitedNodes[sig.Node]) return;
+        //     visitedNodes[sig.Node] = true;
+        //     if (sig is ExpandedSig expandedSig)
+        //     {
+        //         foreach (var child in expandedSig.Children)
+        //         {
+        //             MarkNodesAsVisited(child);
+        //         }
+        //     }
+        // }
     }
 
 
@@ -164,11 +168,6 @@ public class GraphSignature
     public override string ToString()
     {
         return $"{(_inverted ? "!" : "")}[{string.Join(",", _signature.Select(s => s.ToString()))}]";
-    }
-
-    public string DebugSig()
-    {
-        return $"{(_inverted ? "!" : "")}[{string.Join(",", _signature.Select(s => s.DebugSig()))}]";
     }
 }
 

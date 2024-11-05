@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Graphs;
@@ -56,6 +57,7 @@ public partial class Research : UserControl
         var graphBuilder = new GraphBuilder(nodeCount);
         Info.Text = $"Brute force {nodeCount}...";
         edges = BuildEdges(nodeCount);
+        var doubleCheck = doubleCheckCheckBox.IsChecked.Value;
 
         configCount = 1 << edges.Count;
         DateTime lastDisplayed = DateTime.UnixEpoch;
@@ -85,7 +87,27 @@ public partial class Research : UserControl
 
             graph = graphBuilder.Build();
             var sig = graph.CalculateSignature();
-            if (!signatures.ContainsKey(sig)) signatures.Add(sig, graph);
+            Graph? originalGraph;
+            signatures.TryGetValue(sig, out originalGraph);
+            if (originalGraph == null)
+            {
+                signatures.Add(sig, graph);
+            }
+            else if (doubleCheck)
+            {
+                var result = SimpleIsomorphic.AreIsomorphic(originalGraph, graph);
+                if (result == false)
+                {
+                    var message =
+                        $"{Graph6.Serialize(graph)} is not isomorphic with {Graph6.Serialize(originalGraph)}" +
+                        " but they have the same signature.\n" +
+                        $"Signature: {sig}";
+                    Console.WriteLine(message);
+                    Info.Text = message;
+                    return signatures;
+                }
+            }
+
             if ((DateTime.Now - lastDisplayed).TotalMilliseconds > 100)
             {
                 await Display();
@@ -163,6 +185,7 @@ public partial class Research : UserControl
                     {
                         await Display();
                     }
+
                     config += 1;
                 }
             }

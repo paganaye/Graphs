@@ -22,8 +22,11 @@ public partial class GraphControl : UserControl
         RandomGraphButton.Click += OnRandomGraphButtonClick;
         ShuffleButton.Click += OnShuffleButtonClick;
         NodeCountControl.ValueChanged += OnNodeCountChanged;
-        EdgeListTextBox.TextChanged += OnGraph6TextBoxChanged;
+        EdgeListTextBox.TextChanged += OnEdgeListTextBoxChanged;
+        Graph6TextBox.TextChanged += Graph6TextBoxOnTextChanged;
+        AdjacencyTextBox.TextChanged += AdjacencyTextBoxOnTextChanged;
     }
+
 
     public async Task SetGraph(Graph graph)
     {
@@ -66,7 +69,7 @@ public partial class GraphControl : UserControl
         SetGraph(GraphShuffler.Shuffled(_graph));
     }
 
-    private void OnGraph6TextBoxChanged(object? sender, TextChangedEventArgs e)
+    private void OnEdgeListTextBoxChanged(object? sender, TextChangedEventArgs e)
     {
         if (_graph == null) return;
         try
@@ -81,21 +84,59 @@ public partial class GraphControl : UserControl
         }
     }
 
+    private void AdjacencyTextBoxOnTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (_graph == null) return;
+        try
+        {
+            var text = AdjacencyTextBox.Text ?? "";
+            if (text.Length == 0) return;
+            var newGraph = AdjacencyList.Deserialize(text);
+            SetGraph(newGraph);
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
+    private void Graph6TextBoxOnTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (_graph == null) return;
+        try
+        {
+            var text = Graph6TextBox.Text ?? "";
+            if (text.Length == 0) return;
+            var newGraph = Graph6.Deserialize(text);
+            SetGraph(newGraph);
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
     private async Task UpdateGraph()
     {
         if (_graph == null) return;
 
-        EdgeListTextBox.IsEnabled = false;
-        GraphSignatureTextBox.IsEnabled = false;
+        Controls.IsEnabled = false;
         await Task.Delay(1);
-
-        NodeCountControl.Value = _graph.NodeCount;
-        EdgeListTextBox.Text = EdgeList.Serialize(_graph);
-        EdgeListTextBox.IsEnabled = true;
-        await Task.Delay(1);
-        GraphView.Content = new GraphView(_graph);
-        await Task.Delay(1);
-        GraphSignatureTextBox.Text = new GraphSignature(_graph).ToString();
-        GraphSignatureTextBox.IsEnabled = true;
+        try
+        {
+            AdjacencyTextBox.Text = AdjacencyList.Serialize(_graph);
+            EdgeListTextBox.Text = EdgeList.Serialize(_graph);
+            Graph6TextBox.Text = Graph6.Serialize(_graph);
+            NodeCountControl.Value = _graph.NodeCount;
+            await Task.Delay(1);
+            GraphView.Content = new GraphView(_graph);
+            await Task.Delay(1);
+            GraphSignatureTextBox.Text = new GraphSignature(_graph).ToString();
+            GraphSignatureTextBox.IsEnabled = true;
+        }
+        finally
+        {
+            Controls.IsEnabled = true;
+        }
     }
 }

@@ -105,7 +105,7 @@ public class Graph
         if (NodeCount != other.NodeCount || MaxEdgeCount != other.MaxEdgeCount)
             return false;
 
-        for (int j = 0; j < NodeCount; j++)
+        for (int j = 1; j < NodeCount; j++)
         {
             for (int i = 0; i < j; i++)
             {
