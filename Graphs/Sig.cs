@@ -6,54 +6,50 @@ namespace Graphs;
 using System.Collections.Generic;
 using System.Linq;
 
-public abstract class Sig(int node)
+public enum SigType
+{
+    Loop = 3,
+    Expanded = 2,
+    Collapsed = 1
+}
+
+public class Sig(int node)
 {
     public int Node = node; // this is used only temporarily to build the Signatures then it is all cleared at the end.
-    public abstract int Order { get; }
-}
 
-public class CollapsedSig(int node, int neighborCount) : Sig(node)
-{
-    public readonly int NeighborCount = neighborCount;
+    public SigType SigType { get; private set; }
+
+    public Sig[]? Neighbors { get; private set; }
+
+    public int Loop { get; private set; }
+
+    public int NeighborCount { get; private set; }
+
+    public static Sig NewCollapsedSig(int node, int neighborCount)
+    {
+        return new Sig(node) { NeighborCount = neighborCount, SigType = SigType.Collapsed };
+    }
+
+    public static Sig NewExpandedSig(int node, Sig[] neighbors)
+    {
+        return new Sig(node) { Neighbors = neighbors, SigType = SigType.Expanded };
+    }
+
+    public static Sig NewLoopSig(int node, int loop)
+    {
+        return new Sig(node) { Loop = loop, SigType = SigType.Loop };
+    }
 
     public override string ToString()
     {
-        return NeighborCount.ToString();
+        return SigType switch
+        {
+            SigType.Loop => (Loop).ToString(),
+            SigType.Collapsed => NeighborCount.ToString(),
+            // ReSharper disable once CoVariantArrayConversion
+            SigType.Expanded => $"[{string.Join(",", (object[])Neighbors!)}]",
+        };
     }
-
-    public override int Order => 1;
-    
-}
-
-public class ExpandedSig(int node, Sig[] children) : Sig(node)
-{
-    public readonly Sig[] Children = children;
-
-    public override string ToString()
-    {
-        // ReSharper disable once CoVariantArrayConversion
-        return $"[{string.Join(",", (object[])Children)}]";
-    }
-    public override int Order => 2;
-}
-
-public class LoopSig : Sig
-{
-    public LoopSig(int node, int loop) : base(node)
-    {
-        if (loop >= 0) throw new InvalidProgramException("Loops should be negative");
-        this.Loop = loop;
-    }
-
-    public int Loop { get; }
-
-    public override string ToString()
-    {
-        return (Loop).ToString();
-    }
-
-    public override int Order => 3;
-
 }
 
 public class SigComparer : IComparer<Sig>, IEqualityComparer<Sig>
@@ -64,42 +60,42 @@ public class SigComparer : IComparer<Sig>, IEqualityComparer<Sig>
             throw new ArgumentNullException("Cannot compare null values.");
 
         // Handle LinkSig first as it has priority in the order
-        if (x is LoopSig lx && y is LoopSig ly)
+        if (x.SigType == SigType.Loop && y.SigType == SigType.Loop)
         {
-            return lx.Loop.CompareTo(ly.Loop);
+            return x.Loop.CompareTo(y.Loop);
         }
-        else if (x is LoopSig)
+        else if (x.SigType == SigType.Loop)
         {
             return -1; // LinkSig comes before any other Sig type
         }
-        else if (y is LoopSig)
+        else if (y.SigType == SigType.Loop)
         {
             return 1; // Any other Sig type comes after LinkSig
         }
 
         // CollapsedSig vs CollapsedSig comparison
-        if (x is CollapsedSig cx && y is CollapsedSig cy)
+        if (x.SigType == SigType.Collapsed && y.SigType == SigType.Collapsed)
         {
-            return cy.NeighborCount.CompareTo(cx.NeighborCount);
+            return y.NeighborCount.CompareTo(x.NeighborCount);
         }
 
         // ExpandedSig vs ExpandedSig comparison
-        if (x is ExpandedSig ex && y is ExpandedSig ey)
+        if (x.SigType == SigType.Expanded && y.SigType == SigType.Expanded)
         {
-            int lengthComparison = ex.Children.Length.CompareTo(ey.Children.Length);
+            int lengthComparison = x.Neighbors!.Length.CompareTo(y.Neighbors!.Length);
             if (lengthComparison != 0) return lengthComparison;
 
             // Recursively compare each child element if lengths are equal
-            for (int i = 0; i < ex.Children.Length; i++)
+            for (int i = 0; i < x.Neighbors.Length; i++)
             {
-                int childComparison = Compare(ex.Children[i], ey.Children[i]);
+                int childComparison = Compare(x.Neighbors[i], y.Neighbors[i]);
                 if (childComparison != 0) return childComparison;
             }
 
             return 0;
         }
 
-        var orderResult = x.Order.CompareTo(y.Order);
+        var orderResult = x.SigType.CompareTo(y.SigType);
         if (orderResult != 0) return orderResult;
         else throw new InvalidOperationException("Internal Error in SigComparer");
     }
@@ -112,20 +108,20 @@ public class SigComparer : IComparer<Sig>, IEqualityComparer<Sig>
         if (ReferenceEquals(x, y))
             return true;
 
-        if (x is LoopSig lx && y is LoopSig ly)
-            return lx.Loop == ly.Loop;
+        if (x.SigType == SigType.Loop && y.SigType == SigType.Loop)
+            return x.Loop == y.Loop;
 
-        if (x is CollapsedSig cx && y is CollapsedSig cy)
-            return cx.NeighborCount == cy.NeighborCount;
+        if (x.SigType == SigType.Collapsed && y.SigType == SigType.Collapsed)
+            return x.NeighborCount == y.NeighborCount;
 
-        if (x is ExpandedSig ex && y is ExpandedSig ey)
+        if (x.SigType == SigType.Expanded && y.SigType == SigType.Expanded)
         {
-            if (ex.Children.Length != ey.Children.Length)
+            if (x.Neighbors!.Length != y.Neighbors!.Length)
                 return false;
 
-            for (int i = 0; i < ex.Children.Length; i++)
+            for (int i = 0; i < x.Neighbors.Length; i++)
             {
-                if (!Equals(ex.Children[i], ey.Children[i]))
+                if (!Equals(x.Neighbors[i], y.Neighbors[i]))
                     return false;
             }
 
@@ -140,12 +136,9 @@ public class SigComparer : IComparer<Sig>, IEqualityComparer<Sig>
         if (obj == null)
             throw new ArgumentNullException(nameof(obj));
 
-        return obj switch
-        {
-            LoopSig lx => lx.Loop.GetHashCode(),
-            CollapsedSig cx => cx.NeighborCount.GetHashCode(),
-            ExpandedSig ex => ex.Children.Aggregate(0, (hash, child) => hash ^ GetHashCode(child)),
-            _ => throw new InvalidOperationException("Unsupported Sig type")
-        };
+        if (obj.SigType == SigType.Loop) return obj.Loop.GetHashCode();
+        else if (obj.SigType == SigType.Collapsed) return obj.NeighborCount.GetHashCode();
+        else if (obj.SigType == SigType.Expanded) return obj.Neighbors!.Aggregate(0, (hash, child) => hash ^ GetHashCode(child));
+        else throw new InvalidOperationException("Unsupported Sig type");
     }
 }

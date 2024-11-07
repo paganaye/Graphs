@@ -36,34 +36,41 @@ public partial class Research : UserControl
     private List<(int, int)> edges = [];
     private Int64 configCount = 0;
     private Int64 config = 0;
+    Dictionary<string, Graph> signatures = new();
+    private bool saveToFiles = false;
+    private bool doubleCheck = false;
 
+    private void Button3_OnClick(object? sender, RoutedEventArgs e) => BruteForce(3, 4, Button3Text);
+    private void Button4_OnClick(object? sender, RoutedEventArgs e) => BruteForce(4, 11, Button4Text);
+    private void Button5_OnClick(object? sender, RoutedEventArgs e) => BruteForce(5, 34, Button5Text);
+    private void Button6_OnClick(object? sender, RoutedEventArgs e) => BruteForce(6, 156, Button6Text);
+    private void Button7_OnClick(object? sender, RoutedEventArgs e) => BruteForce(7, 1044, Button7Text);
+    private void Button8_OnClick(object? sender, RoutedEventArgs e) => BruteForce(8, 12346, Button8Text);
 
-    private void Button3_OnClick(object? sender, RoutedEventArgs e) => BruteForce(3, Button3Text);
-    private void Button4_OnClick(object? sender, RoutedEventArgs e) => BruteForce(4, Button4Text);
-    private void Button5_OnClick(object? sender, RoutedEventArgs e) => BruteForce(5, Button5Text);
-    private void Button6_OnClick(object? sender, RoutedEventArgs e) => BruteForce(6, Button6Text);
-    private void Button7_OnClick(object? sender, RoutedEventArgs e) => BruteForce(7, Button7Text);
-    private void Button8_OnClick(object? sender, RoutedEventArgs e) => BruteForce(8, Button8Text);
+    private void Button6S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(3, 3, 156, Button6SText);
+    private void Button7S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(3, 4, 1044, Button7SText);
+    private void Button8S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(4, 4, 12346, Button8SText);
+    private void Button9S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(4, 5, 274668, Button9SText);
+    private void Button10S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(5, 5, 999999999, Button10SText);
 
-    private void Button6S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(3, 3, Button6SText);
-    private void Button7S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(3, 4, Button7SText);
-    private void Button8S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(4, 4, Button8SText);
-    private void Button9S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(4, 5, Button9SText);
-    private void Button10S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(5, 5, Button10SText);
-
-
-    private async Task<Dictionary<string, Graph>> BruteForce(int nodeCount, TextBlock textBlock)
+    private void Init()
     {
+        doubleCheck = doubleCheckCheckBox.IsChecked!.Value;
+        saveToFiles = saveToFilesCheckBox.IsChecked!.Value;
+    }
+
+    private async Task<Dictionary<string, Graph>> BruteForce(int nodeCount, int expectedResult, TextBlock textBlock)
+    {
+        Init();
         var graphBuilder = new GraphBuilder(nodeCount);
         Info.Text = $"Brute force {nodeCount}...";
         edges = BuildEdges(nodeCount);
-        var doubleCheck = doubleCheckCheckBox.IsChecked.Value;
 
         configCount = 1 << edges.Count;
         DateTime lastDisplayed = DateTime.UnixEpoch;
         Graph? graph = null;
         ProgressBar1.IsVisible = true;
-        Dictionary<string, Graph> signatures = new();
+        signatures.Clear();
 
         async Task Display()
         {
@@ -87,26 +94,7 @@ public partial class Research : UserControl
 
             graph = graphBuilder.Build();
             var sig = graph.CalculateSignature();
-            Graph? originalGraph;
-            signatures.TryGetValue(sig, out originalGraph);
-            if (originalGraph == null)
-            {
-                signatures.Add(sig, graph);
-            }
-            else if (doubleCheck)
-            {
-                var result = SimpleIsomorphic.AreIsomorphic(originalGraph, graph);
-                if (result == false)
-                {
-                    var message =
-                        $"{Graph6.Serialize(graph)} is not isomorphic with {Graph6.Serialize(originalGraph)}" +
-                        " but they have the same signature.\n" +
-                        $"Signature: {sig}";
-                    Console.WriteLine(message);
-                    Info.Text = message;
-                    return signatures;
-                }
-            }
+            AddSignature(sig, graph);
 
             if ((DateTime.Now - lastDisplayed).TotalMilliseconds > 100)
             {
@@ -121,18 +109,44 @@ public partial class Research : UserControl
         }
 
         Info.Text = $"Brute force {nodeCount} nodes graphs gives us {signatures.Count} distinct signatures.";
+        return new Dictionary<string, Graph>(signatures);
+    }
 
-        return signatures;
+    private void AddSignature(string sig, Graph graph)
+    {
+        Graph originalGraph;
+        signatures.TryGetValue(sig, out originalGraph);
+        if (originalGraph == null)
+        {
+            signatures.Add(sig,graph);
+        }
+        else if (doubleCheck)
+        {
+            var result = SimpleIsomorphic.AreIsomorphic(originalGraph, graph);
+            if (result == false)
+            {
+                var message =
+                    $"{Graph6.Serialize(graph)} is not isomorphic with {Graph6.Serialize(originalGraph)}" +
+                    " but they have the same signature.\n" +
+                    $"Signature: {sig}";
+                Console.WriteLine(message);
+                Info.Text = message;
+                throw new Exception("Internal error the signature is matching a graph that is not isomorphic.");
+            }
+        }
     }
 
     private async Task<Dictionary<string, Graph>> SemiBruteForce(int leftNodeCount, int rightNodeCount,
+        int expectedResult,
         TextBlock textBlock)
     {
-        var leftSignatures = await BruteForce(leftNodeCount, Info);
-        var rightSignatures = await BruteForce(rightNodeCount, Info);
+        Init();
+
+        var leftSignatures = await BruteForce(leftNodeCount, -1, Info);
+        var rightSignatures = await BruteForce(rightNodeCount, -1, Info);
 
         int nodeCount = leftNodeCount + rightNodeCount;
-
+        this.signatures.Clear();
         var graphBuilder = new GraphBuilder(nodeCount);
 
         Info.Text = $"Semi brute force {nodeCount}...";
@@ -200,8 +214,7 @@ public partial class Research : UserControl
 
         Info.Text =
             $"Semi brute force of {leftNodeCount} and {rightNodeCount} nodes graphs gives us {signatures.Count} distinct signatures.";
-
-        return signatures;
+        return new Dictionary<string, Graph>(signatures);
     }
 
     private void CopyEdges(Graph graph, GraphBuilder graphBuilder, int offset)

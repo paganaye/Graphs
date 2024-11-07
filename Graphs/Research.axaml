@@ -13,10 +13,10 @@
         <Grid ColumnDefinitions="*,*">
             <DockPanel x:Name="Panel1" Grid.Column="0" LastChildFill="True">
                 <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap">Here we are trying to find the the number of nonisomorphic undirected graphs with n vertices.</TextBlock>
-                <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap">We are supposed to find 1, 2, 4, 11, 34, 156, 1044, 12346 according to Wolfram</TextBlock>
-                <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap">But we find 1, 2, 4, 11, 34, 156, 1020, 10869 here.</TextBlock>
-                <CheckBox DockPanel.Dock="Top" Name="doubleCheckCheckBox">Double check that</CheckBox>
+                <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap">We are supposed to find 1, 2, 4, 11, 34, 156, 1 044, 12 346, 274 668, 12 005 168, 1 018 997 864, 165 091 172 592, 50 502 031 367 952 according to Wolfram</TextBlock>
                 <TextBlock FontWeight="Bold" DockPanel.Dock="Top">Brute force</TextBlock>
+                <CheckBox DockPanel.Dock="Top" Name="saveToFilesCheckBox">Save to files</CheckBox>
+                <CheckBox DockPanel.Dock="Top" Name="doubleCheckCheckBox">Double check with slow isomorphic algorithm.</CheckBox>
                 <DockPanel LastChildFill="True" DockPanel.Dock="Top">
                     <Button DockPanel.Dock="Left" Click="Button3_OnClick">3 nodes</Button>
                     <TextBlock Name="Button3Text"></TextBlock>

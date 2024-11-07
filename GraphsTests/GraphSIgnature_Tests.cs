@@ -32,7 +32,7 @@ public class GraphSignatureTests
             Is.EqualTo(0));
 
         // then this should be sorted
-        Assert.That(signature.ToString(), Is.EqualTo("[2,[],[],[[-1,[-1]]],[[-1,[-1]]]]"));
+        Assert.That(signature.ToString(), Is.EqualTo("[[[-1],[-1]],[],[],[[-1,[-1]]],[[-1,[-1]]]]"));
     }
 
     [Test]
@@ -51,7 +51,7 @@ public class GraphSignatureTests
         // Assert.That(signature.UnsortedNodeSignatures[0].DebugSig(), Is.EqualTo("ANeighbours(3)"));
         // Assert.That(signature.UnsortedNodeSignatures[4].DebugSig(), Is.EqualTo("ENeighbours(1)"));
 
-        Assert.That(signature.ToString(), Is.EqualTo("[3,1,[3,1],[[-1,[-2,-1,[-1,[-1]]]],[-1,[-2,-1],[-1,[-1]]]]]"));
+        Assert.That(signature.ToString(), Is.EqualTo("[[[-1,[-1]],[-1,[-2,-1]],[-1,[-2,-1]]],[[-1,[-1,[-1,[-2,-1]],[-1,[-2,-1]]]]],[[-1],[-1,[-1,[-2,-1]],[-1,[-2,-1]]]],[[-1,[-2,-1,[-1,[-1]]]],[-1,[-2,-1],[-1,[-1]]]],[[-1,[-2,-1,[-1,[-1]]]],[-1,[-2,-1],[-1,[-1]]]]]"));
     }
 
     [Test]

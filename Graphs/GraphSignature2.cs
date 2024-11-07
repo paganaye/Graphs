@@ -4,19 +4,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class GraphSignature
+public class GraphSignature2
 {
     private readonly Graph _graph;
     private readonly bool _inverted;
-    private readonly SigComparer _sigComparer = new();
+    private readonly Sig2Comparer _sigComparer = new();
 
-    private List<Sig> _unsortedNodeSignatures = [];
-    private List<Sig> _signature = [];
+    private List<Sig2> _unsortedNodeSignatures = [];
+    private List<Sig2> _signature = [];
 
-    public List<Sig> UnsortedNodeSignatures => _unsortedNodeSignatures;
-    public List<Sig> Signature => _signature;
-
-    public GraphSignature(Graph graph)
+    public List<Sig2> UnsortedNodeSignatures => _unsortedNodeSignatures;
+    public List<Sig2> Signature => _signature;
+    
+    public GraphSignature2(Graph graph)
     {
         _inverted = (graph.GetActiveEdgeCount() > graph.MaxEdgeCount / 2);
         _graph = _inverted ? graph.Invert() : graph;
@@ -32,7 +32,7 @@ public class GraphSignature
     }
 
 
-    private List<Sig> GetSortedNodeSignatures()
+    private List<Sig2> GetSortedNodeSignatures()
     {
         return _unsortedNodeSignatures.OrderBy(s => s, _sigComparer).ToList();
     }
@@ -46,14 +46,13 @@ public class GraphSignature
             var expanded = false;
             do
             {
-                expanded = ExpandSignatureTree(ref sig);
-                if (expanded) sortedSignatures[i] = sig;
+                expanded = ExpandSignatureTree(sig);
             } while (expanded);
         }
 
         _signature = sortedSignatures;
 
-        // var filteredSignatures = new List<Sig>();
+        // var filteredSignatures = new List<Sig2>();
         // foreach (var signature in sortedSignatures)
         // {
         //     if (!visitedNodes[signature.Node])
@@ -65,7 +64,7 @@ public class GraphSignature
         //
         // _signature = filteredSignatures;
         //
-        // void MarkNodesAsVisited(Sig sig)
+        // void MarkNodesAsVisited(Sig2 sig)
         // {
         //     if (visitedNodes[sig.Node]) return;
         //     visitedNodes[sig.Node] = true;
@@ -83,19 +82,18 @@ public class GraphSignature
     private void InitializeBaseSignatures()
     {
         _unsortedNodeSignatures = _graph.ForEachNode()
-            .Select(nodeIndex => Sig.NewCollapsedSig(nodeIndex, _graph.GetNeighborCount(nodeIndex)))
-            .Cast<Sig>()
+            .Select(nodeIndex => Sig2.NewCollapsed(nodeIndex, _graph.GetNeighborCount(nodeIndex)))
             .ToList();
     }
 
-    private List<List<Sig>> GroupSignatures()
+    private List<List<Sig2>> GroupSignatures()
     {
         return _unsortedNodeSignatures
             .GroupBy(sig => sig, (key, group) => group.ToList(), _sigComparer)
             .ToList();
     }
 
-    private bool ExpandAmbiguousGroups(List<List<Sig>> groupedSignatures)
+    private bool ExpandAmbiguousGroups(List<List<Sig2>> groupedSignatures)
     {
         var expanded = false;
 
@@ -104,7 +102,7 @@ public class GraphSignature
             for (int i = 0; i < group.Count; i++)
             {
                 var sig = group[i];
-                var hasExpanded = ExpandSignatureTree(ref sig);
+                var hasExpanded = ExpandSignatureTree(sig);
                 if (hasExpanded)
                 {
                     _unsortedNodeSignatures[sig.Node] = sig;
@@ -116,44 +114,44 @@ public class GraphSignature
         return expanded;
     }
 
-    private bool ExpandSignatureTree(ref Sig sig)
+    private bool ExpandSignatureTree(Sig2 sig)
     {
         bool expanded = false;
         var visited = new int[_graph.NodeCount];
 
-        bool Dfs(int level, ref Sig currentSig)
+        bool Dfs(int level, ref Sig2 currentSig)
         {
-            if (currentSig.SigType == SigType.Collapsed)
+            if (currentSig.Loop != 0) return false;
+            else if (currentSig.Children == null)
             {
-                var children = new List<Sig>();
+                var children = new List<Sig2>();
                 foreach (var neighbor in _graph.ForEachNeighbor(currentSig.Node))
                 {
                     if (visited[neighbor] > 0)
-                        children.Add(Sig.NewLoopSig(neighbor, visited[neighbor] - level));
+                        children.Add(Sig2.NewLoop(neighbor, level - visited[neighbor]));
                     else
-                        children.Add(Sig.NewCollapsedSig(neighbor, _graph.GetNeighborCount(neighbor)));
+                        children.Add(Sig2.NewCollapsed(neighbor, _graph.GetNeighborCount(neighbor)));
                 }
 
                 children.Sort(_sigComparer);
 
-                currentSig = Sig.NewExpandedSig(currentSig.Node, children.ToArray());
+                currentSig.Children = children.ToArray();
                 expanded = true;
                 return true;
             }
-            else if (currentSig.SigType == SigType.Expanded)
+            else
             {
                 visited[currentSig.Node] = level;
                 bool modified = false;
-                for (int i = 0; i < currentSig.Neighbors.Length; i++)
+                for (int i = 0; i < currentSig.Children.Length; i++)
                 {
-                    modified |= Dfs(level + 1, ref currentSig.Neighbors[i]);
+                    modified |= Dfs(level + 1, ref currentSig.Children[i]);
                 }
 
-                if (modified) Array.Sort(currentSig.Neighbors, _sigComparer);
+                if (modified) Array.Sort(currentSig.Children, _sigComparer);
                 visited[currentSig.Node] = 0;
                 return modified;
             }
-            else return false;
         }
 
         Dfs(1, ref sig);
@@ -180,42 +178,10 @@ public class GraphSignature
 
 public static partial class GraphExtensions
 {
-    public static string CalculateSignature(this Graph graph)
+    public static string CalculateSignature2(this Graph graph)
     {
-        return new GraphSignature(graph).ToString();
+        return new GraphSignature2(graph).ToString();
     }
 
-    public static Graph Invert(this Graph graph)
-    {
-        var count = graph.NodeCount;
-        var newGraph = new GraphBuilder(count);
-        for (int j = 1; j < count; j++)
-        {
-            for (int i = 0; i < j; i++)
-            {
-                if (!graph.HasEdge(i, j))
-                {
-                    newGraph.SetEdge(i, j, true);
-                }
-            }
-        }
 
-        return newGraph.Build();
-    }
-
-    public static int GetActiveEdgeCount(this Graph? graph)
-    {
-        if (graph == null) return 0;
-        int count = 0;
-        foreach (int node in graph.ForEachNode())
-        {
-            foreach (int neighbor in graph.ForEachNeighbor(node))
-            {
-                if (neighbor < node) count++;
-                else break;
-            }
-        }
-
-        return count;
-    }
 }
