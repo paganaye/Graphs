@@ -40,18 +40,28 @@ public partial class Research : UserControl
     private bool saveToFiles = false;
     private bool doubleCheck = false;
 
-    private void Button3_OnClick(object? sender, RoutedEventArgs e) => BruteForce(3, 4, Button3Text);
-    private void Button4_OnClick(object? sender, RoutedEventArgs e) => BruteForce(4, 11, Button4Text);
-    private void Button5_OnClick(object? sender, RoutedEventArgs e) => BruteForce(5, 34, Button5Text);
-    private void Button6_OnClick(object? sender, RoutedEventArgs e) => BruteForce(6, 156, Button6Text);
-    private void Button7_OnClick(object? sender, RoutedEventArgs e) => BruteForce(7, 1044, Button7Text);
-    private void Button8_OnClick(object? sender, RoutedEventArgs e) => BruteForce(8, 12346, Button8Text);
+    private void Button3_OnClick(object? sender, RoutedEventArgs e) => _ = BruteForce(3, 4, Button3Text);
+    private void Button4_OnClick(object? sender, RoutedEventArgs e) => _ = BruteForce(4, 11, Button4Text);
+    private void Button5_OnClick(object? sender, RoutedEventArgs e) => _ = BruteForce(5, 34, Button5Text);
+    private void Button6_OnClick(object? sender, RoutedEventArgs e) => _ = BruteForce(6, 156, Button6Text);
+    private void Button7_OnClick(object? sender, RoutedEventArgs e) => _ = BruteForce(7, 1044, Button7Text);
+    private void Button8_OnClick(object? sender, RoutedEventArgs e) => _ = BruteForce(8, 12346, Button8Text);
 
-    private void Button6S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(3, 3, 156, Button6SText);
-    private void Button7S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(3, 4, 1044, Button7SText);
-    private void Button8S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(4, 4, 12346, Button8SText);
-    private void Button9S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(4, 5, 274668, Button9SText);
-    private void Button10S_OnClick(object? sender, RoutedEventArgs e) => SemiBruteForce(5, 5, 999999999, Button10SText);
+    private void Button6S_OnClick(object? sender, RoutedEventArgs e) => _ = SemiBruteForce(3, 3, 156, Button6SText);
+    private void Button7S_OnClick(object? sender, RoutedEventArgs e) => _ = SemiBruteForce(3, 4, 1044, Button7SText);
+    private void Button8S_OnClick(object? sender, RoutedEventArgs e) => _ = SemiBruteForce(4, 4, 12346, Button8SText);
+    private void Button9S_OnClick(object? sender, RoutedEventArgs e) => _ = SemiBruteForce(4, 5, 274668, Button9SText);
+
+    private void Button10S_OnClick(object? sender, RoutedEventArgs e) =>
+        _ = SemiBruteForce(5, 5, 999999999, Button10SText);
+
+    private void Button6I_OnClick(object? sender, RoutedEventArgs e) => _ = IncrementalForce(5, 156, Button6IText);
+    private void Button7I_OnClick(object? sender, RoutedEventArgs e) => _ = IncrementalForce(6, 1044, Button7IText);
+    private void Button8I_OnClick(object? sender, RoutedEventArgs e) => _ = IncrementalForce(7, 12346, Button8IText);
+    private void Button9I_OnClick(object? sender, RoutedEventArgs e) => _ = IncrementalForce(8, 274668, Button9IText);
+
+    private void Button10I_OnClick(object? sender, RoutedEventArgs e) =>
+        _ = IncrementalForce(9, 999999999, Button10SText);
 
     private void Init()
     {
@@ -118,7 +128,7 @@ public partial class Research : UserControl
         signatures.TryGetValue(sig, out originalGraph);
         if (originalGraph == null)
         {
-            signatures.Add(sig,graph);
+            signatures.Add(sig, graph);
         }
         else if (doubleCheck)
         {
@@ -214,6 +224,90 @@ public partial class Research : UserControl
 
         Info.Text =
             $"Semi brute force of {leftNodeCount} and {rightNodeCount} nodes graphs gives us {signatures.Count} distinct signatures.";
+        return new Dictionary<string, Graph>(signatures);
+    }
+
+    private async Task<Dictionary<string, Graph>> IncrementalForce(int leftNodeCount,
+        int expectedResult,
+        TextBlock textBlock)
+    {
+        Init();
+        Dictionary<string, Graph> leftSignatures;
+
+        if (leftNodeCount < 5)
+        {
+            leftSignatures = await BruteForce(leftNodeCount, -1, Info);
+        }
+        else
+        {
+            leftSignatures = await IncrementalForce(leftNodeCount - 1, -1, Info);
+        }
+
+        int nodeCount = leftNodeCount + 1;
+        this.signatures.Clear();
+        var graphBuilder = new GraphBuilder(nodeCount);
+
+        Info.Text = $"Semi brute force {nodeCount}...";
+        edges = BuildEdges(nodeCount);
+
+        configCount = leftSignatures.Count * 1;
+
+        DateTime lastDisplayed = DateTime.UnixEpoch;
+        Graph? graph = null;
+        ProgressBar1.IsVisible = true;
+        Dictionary<string, Graph> signatures = new();
+
+        async Task Display()
+        {
+            await GraphControl1.SetGraph(graph);
+            lastDisplayed = DateTime.Now;
+            textBlock.Text = $"{signatures.Count:N0} signatures found in {configCount:N0} graphs";
+            ProgressBar1.Value = (double)config / configCount * 100;
+        }
+
+        var innerEdges = BuildInnerEdges(leftNodeCount, 1);
+        var config1Count = leftSignatures.Count * 1;
+        var innerConfigCount = 1 << innerEdges.Count;
+        var rightGraphOffset = leftNodeCount;
+
+        configCount = config1Count * innerConfigCount;
+        config = 0;
+
+        foreach (var leftSig in leftSignatures)
+        {
+            CopyEdges(leftSig.Value, graphBuilder, 0);
+            for (var innerConfig = 0; innerConfig < innerConfigCount; innerConfig++)
+            {
+                for (int i = 0; i < innerEdges.Count; i++)
+                {
+                    var isSet = (innerConfig & (1 << i)) != 0;
+                    var (node1, node2) = innerEdges[i];
+                    graphBuilder.SetEdge(node1, node2, isSet);
+                }
+
+                graph = graphBuilder.Build();
+                var sig = graph.CalculateSignature();
+                if (!signatures.ContainsKey(sig)) signatures.Add(sig, graph);
+
+
+                if ((DateTime.Now - lastDisplayed).TotalMilliseconds > 100)
+                {
+                    await Display();
+                }
+
+                config += 1;
+            }
+        }
+
+
+        if (graph != null)
+        {
+            await Display();
+            ProgressBar1.IsVisible = false;
+        }
+
+        Info.Text =
+            $"Incremental force of {leftNodeCount} and {1} nodes graphs gives us {signatures.Count} distinct signatures.";
         return new Dictionary<string, Graph>(signatures);
     }
 

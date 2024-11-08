@@ -32,7 +32,7 @@ public class Sig(int node)
 
     public static Sig NewExpandedSig(int node, Sig[] neighbors)
     {
-        return new Sig(node) { Neighbors = neighbors, SigType = SigType.Expanded };
+        return new Sig(node) { Neighbors = neighbors, NeighborCount = neighbors.Length, SigType = SigType.Expanded };
     }
 
     public static Sig NewLoopSig(int node, int loop)
@@ -49,6 +49,13 @@ public class Sig(int node)
             // ReSharper disable once CoVariantArrayConversion
             SigType.Expanded => $"[{string.Join(",", (object[])Neighbors!)}]",
         };
+    }
+
+    public void Expand(Sig[] neighbors)
+    {
+        if (neighbors.Length != NeighborCount) throw new InvalidOperationException();
+        this.SigType = SigType.Expanded;
+        this.Neighbors = neighbors;
     }
 }
 
@@ -138,7 +145,8 @@ public class SigComparer : IComparer<Sig>, IEqualityComparer<Sig>
 
         if (obj.SigType == SigType.Loop) return obj.Loop.GetHashCode();
         else if (obj.SigType == SigType.Collapsed) return obj.NeighborCount.GetHashCode();
-        else if (obj.SigType == SigType.Expanded) return obj.Neighbors!.Aggregate(0, (hash, child) => hash ^ GetHashCode(child));
+        else if (obj.SigType == SigType.Expanded)
+            return obj.Neighbors!.Aggregate(0, (hash, child) => hash ^ GetHashCode(child));
         else throw new InvalidOperationException("Unsupported Sig type");
     }
 }

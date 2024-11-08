@@ -62,6 +62,27 @@
                     <Button DockPanel.Dock="Left" Click="Button10S_OnClick">10 nodes (5+5)</Button>
                     <TextBlock Name="Button10SText"></TextBlock>
                 </DockPanel>
+                <TextBlock FontWeight="Bold" DockPanel.Dock="Top">Incremental force</TextBlock>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button6I_OnClick">6 nodes (5+1)</Button>
+                    <TextBlock Name="Button6IText"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button7I_OnClick">7 nodes (6+1)</Button>
+                    <TextBlock Name="Button7IText"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button8I_OnClick">8 nodes (7+1)</Button>
+                    <TextBlock Name="Button8IText"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button9I_OnClick">9 nodes (8+1)</Button>
+                    <TextBlock Name="Button9IText"></TextBlock>
+                </DockPanel>
+                <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                    <Button DockPanel.Dock="Left" Click="Button10I_OnClick">10 nodes (9+10)</Button>
+                    <TextBlock Name="Button10IText"></TextBlock>
+                </DockPanel>                
                 <Panel></Panel>
             </DockPanel>
             <graphs:GraphControl x:Name="GraphControl1" Grid.Column="1" GraphChanged="OnGraph1Changed" />

@@ -135,8 +135,7 @@ public class GraphSignature
                 }
 
                 children.Sort(_sigComparer);
-
-                currentSig = Sig.NewExpandedSig(currentSig.Node, children.ToArray());
+                currentSig.Expand(children.ToArray());
                 expanded = true;
                 return true;
             }
